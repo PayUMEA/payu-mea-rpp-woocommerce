@@ -24,6 +24,8 @@
 	 */	
 	
 
+	DionWired      201799 
+	
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
@@ -55,7 +57,7 @@ function init_your_gateway_class() {
 		$this->id = 'payu';
 		//$this->icon = apply_filters( 'woocommerce_payu_icon', $woocommerce->plugin_url() . '/assets/images/icons/payu_mea_logo.png' );	
 		$this->icon = WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__)) . '/images/payu_mea_logo.png';
-		$this->has_fields = false;
+		$this->has_fields = true;
 		$this->produrl = 'https://secure.payu.co.za';
 		$this->stagingurl = 'https://staging.payu.co.za';	
 		$this->method_title = __( 'PayU - Middle East And Africa (Business/Easymerchant - Redirect Payment Page)', 'woocommerce' );
@@ -66,35 +68,21 @@ function init_your_gateway_class() {
 		$this-> init_settings();
 	
 		// Define user set variables
-		
-		$this->title = $this->settings['title'];
-		$this->description = $this->settings['description'];
-		$this->safekey = $this->settings['safekey']; 
-		$this->username = $this->settings['username']; 
-		$this->password = $this->settings['password']; 
-		$this->testmode	= $this->settings['testmode'];
-		$this->payment_method = $this->settings['payment_method'];
-		$this->transaction_type = $this->settings['transaction_type'];
-		$this->enable_logging = $this->settings['enable_logging'];
-		$this->extended_debug = $this->settings['extended_debug'];
-		$this->debug = $this->settings['debug'];
-		
-		
-		
-		//require_once(dirname(__FILE__) .'/library.payu/inc.demo/config.demo.php');	
-		//$this->safekey = $rpp['Safekey']; 
-		//$this->username = $rpp['username']; 
-		//$this->password = $rpp['password']; 
-		//
-		//$this->title = 'PayU MEA';
-		//$this->description = 'PayU MEA';
-		//$this->testmode	= '1';
-		//$this->payment_method = 'CREDITCARD';
-		//$this->transaction_type = 'PAYMENT';
-		//$this->enable_logging = 'false';
-		//$this->extended_debug = 'false';
-		//$this->debug = 'false';
-		
+		$this->title = $this->get_option( 'title' );
+		$this->description = $this->get_option('description');
+		$this->safekey = $this->get_option('safekey'); 
+		$this->username = $this->get_option('username'); 
+		$this->password = $this->get_option('password'); 
+		$this->testmode	= $this->get_option( 'testmode' );
+		$this->payment_method = $this->get_option( 'payment_method' );
+		$this->transaction_type = $this->get_option( 'transaction_type' );
+		$this->debit_order_enabled = $this->get_option( 'debit_order_enabled' );
+		$this->debit_order_type = $this->get_option('debit_order_type');
+		$this->enable_logging = $this->get_option('enable_logging');
+		$this->extended_debug = $this->get_option('extended_debug');
+		$this->debug = $this->get_option( 'debug' );
+		//$this->currency = $this->get_option( 'currency' );
+	
 		// Logs
 		if ( 'yes' == $this->debug )
 			$this->log = $woocommerce->logger();	
@@ -160,19 +148,42 @@ function init_your_gateway_class() {
 		 * @return void
 		 */
 		function init_form_fields(){
- 
+		
+           // debit order transaction options
+           $dorder_tx_options = array('ONCE_OFF_PAYMENT_AND_DEBIT_ORDER' => __('ONCE_OFF_PAYMENT_AND_DEBIT_ORDER', 'woocommerce'), 'DEBIT_ORDER' => __('DEBIT_ORDER', 'woocommerce'), 'ONCE_OFF_RESERVE_AND_DEBIT_ORDER' => __('ONCE_OFF_RESERVE_AND_DEBIT_ORDER', 'woocommerce'));		
+
 		   $this -> form_fields = array(
 					'enabled' => array(
 							'title' => __('Enable/Disable', 'woocommerce'),
 							'type' => 'checkbox',
 							'label' => __('Enable PayU MEA.', 'woocommerce'),
 							'default' => 'no'),
+					'testmode' => array(
+							'title' => __( 'PayU Environment', 'woocommerce' ),
+							'type' => 'checkbox',
+							'label' => __( 'Enable PayU sandbox', 'woocommerce' ),
+							'default' => 'yes',
+							'description' => __( 'PayU environment to use (ticked = staging/test,unticked = production).', 'woocommerce' ),
 					'title' => array(
 							'title' => __('Title:', 'woocommerce'),
 							'type'=> 'text',
 							'description' => __('This controls the title which the user sees during checkout.', 'woocommerce'),
 							'default' => __('PayU', 'woocommerce'),
 							'desc_tip'      => true,
+					),
+					'credit_card_subtitle'   => array(
+						'title' => __('Credit Card Payment Option Title:', 'woocommerce'),
+						'type'=> 'text',
+						'description' => __('This controls the credit title which the user sees during checkout.', 'woocommerce'),
+						'default' => __('Credit Card', 'woocommerce'),
+						'desc_tip'      => true,
+					),
+					'recurring_subtitle'   => array(
+						'title' => __('Recurring Payment Option Title:', 'woocommerce'),
+						'type'=> 'text',
+						'description' => __('This controls the recurring title which the user sees during checkout.', 'woocommerce'),
+						'default' => __('Credit Card Debit Order', 'woocommerce'),
+						'desc_tip'      => true,
 					),
 					'description' => array(
 							'title' => __('Description:', 'woocommerce'),
@@ -208,19 +219,25 @@ function init_your_gateway_class() {
 							'default' => __('CREDITCARD', 'PayU')
 					),
 					'transaction_type' => array(
-							'title' => __('Payment Type', 'woocommerce'),
+							'title' => __('Transaction Type', 'woocommerce'),
 							'type' => 'text',
-							'description' =>  __('Supported Types', 'woocommerce'),	
+							'description' =>  __('Supported Transaction Types', 'woocommerce'),	
 							'default' => __('PAYMENT', 'PayU')
-					),			
-					'testmode' => array(
-							'title' => __( 'PayU sandbox', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Enable PayU sandbox', 'woocommerce' ),
-							'default' => 'yes',
-							'description' => __( 'PayU sandbox can be used to test payments.', 'woocommerce' )
 					),
-					'debug' => array(
+					'debit_order_enabled' => array(
+							'title' => __('Debit Order Payments', 'woocommerce'),
+							'type' => 'checkbox',
+							'label' => __('Enable Debit Order Payments.', 'woocommerce'),
+							'description' =>  __('If enabled, select the appropriate type below', 'woocommerce'),
+							'default' => 'no'),					
+					'debit_order_type'   => array(
+									'title' => __('Debit Order Type', 'woocommerce'),
+									'type' => 'select',
+									'options' => $dorder_tx_options,
+									'description' => __( 'Select the Debit Order Transaction Type.', 'woocommerce' )
+								),					
+					),
+					/*'debug' => array(
 							'title' => __( 'Debug Log', 'woocommerce' ),
 							'type' => 'checkbox',
 							'label' => __( 'Enable logging', 'woocommerce' ),
@@ -240,7 +257,7 @@ function init_your_gateway_class() {
 							'label' => __( 'Enable PayU extended logging', 'woocommerce' ),
 							'default' => 'no',
 							'description' => __( 'Log PayU events, such as IPN requests at PayU servers', 'woocommerce' )
-					)																											
+					)*/																											
 				);
 		}
 	
@@ -251,8 +268,17 @@ function init_your_gateway_class() {
 		 *  As this is an RPP impementation
 		 **/
 		function payment_fields(){
-			if($this -> description) echo wpautop(wptexturize($this -> description));
+		if($this -> description) echo wpautop(wptexturize($this -> description));
+		?>			
+			<input type="radio" name="payu_transaction_type" id="payu_transaction_type" value="default" checked><?php print $this->settings['credit_card_subtitle'];?><br>
+			<?php	if ( is_user_logged_in() ) : ?>
+			<?php		if ( $this->debit_order_enabled == 'yes' && $this->debit_order_type != '') :?>
+			<input type="radio" name="payu_transaction_type" id="payu_transaction_type" value="recurring" ><?php print $this->settings['recurring_subtitle'];?><br>
+			<?php endif;
+			endif;
 		}
+		
+		
 		/**
 		 * Process the payment and return the result
 		 */
@@ -261,7 +287,12 @@ function init_your_gateway_class() {
 			//require('library.payu/classes/class.PayuRedirectPaymentPage.php');
 			require(WP_PLUGIN_DIR . "/" . plugin_basename( dirname(__FILE__)) . '/library.payu/classes/class.PayuRedirectPaymentPage.php');
 			$redirectapi = '/rpp.do?PayUReference=';
-		
+			
+			//$this->params[$paymentType] = $_POST['payu_transaction_type']; 
+			$transactionTypeSelection = $_POST['payu_transaction_type'];
+			//$debit_order_type_select = "";
+			//$debit_order_type_select .= "<option value='" . $month . "' " . $select . ">" . $month . "</option>\n";
+			
 			try {	
 				// get order data	
 				$order = new WC_Order($order_id);
@@ -279,27 +310,41 @@ function init_your_gateway_class() {
 				if($this->settings['testmode'] == "no") {		
 					$prod = 1;
 					$payu_adr = $this->produrl;
-					$soapUsername = $this->settings['username'];
-					$soapPassword = $this->settings['password'];
-					$safeKey = $this->settings['safekey'];
+					
+					//$soapUsername = $this->settings['username'];
+					//$soapPassword = $this->settings['password'];
+					//$safeKey = $this->settings['safekey'];
 				}			
 				else {
-					require_once(WP_PLUGIN_DIR . "/" . plugin_basename( dirname(__FILE__)) . '/library.payu/inc.demo/config.demo.php');
-					//require_once('library.payu/inc.demo/config.demo.php');	
+					$payu_adr = $this->stagingurl;
 					
+					//require_once(WP_PLUGIN_DIR . "/" . plugin_basename( dirname(__FILE__)) . '/library.payu/inc.demo/config.demo.php');
+					//$soapUsername = $rpp['username'];
+					//$soapPassword = $rpp['password'];
+					//$safeKey = $rpp['Safekey'];										
+					
+					//require_once('library.payu/inc.demo/config.demo.php');						
 					//$rpp['username'] = 'Staging Integration Store 1';
 					//$rpp['password'] = '78cXrW1W';
-					//$rpp['Safekey'] = '{45D5C765-16D2-45A4-8C41-8D6F84042F8C}';
-					
-					$payu_adr = $this->stagingurl;					
-					$soapUsername = $rpp['username'];
-					$soapPassword = $rpp['password'];
-					$safeKey = $rpp['Safekey'];										
-				}					
+					//$rpp['Safekey'] = '{45D5C765-16D2-45A4-8C41-8D6F84042F8C}';					
+				}	
+
+				$soapUsername = $this->settings['username'];
+				$soapPassword = $this->settings['password'];
+				$safeKey = $this->settings['safekey'];				
 				
 				$setTransactionSoapDataArray = array();
 				$setTransactionSoapDataArray['Safekey'] = $safeKey;
-				$setTransactionSoapDataArray['TransactionType'] = $this->transaction_type;			
+				
+				if ($transactionTypeSelection == "default") {          
+					$setTransactionSoapDataArray['TransactionType'] = $this->transaction_type;	      
+				}
+				else {
+					$this->transaction_type = $this->debit_order_type;
+					$setTransactionSoapDataArray['TransactionType'] = $this->transaction_type;	
+				}
+				
+				//$setTransactionSoapDataArray['TransactionType'] = $this->transaction_type;			
 				
 				// Create Customer array
 				$customerSubmitArray = array();
@@ -321,7 +366,11 @@ function init_your_gateway_class() {
 
         
 				$customerSubmitArray['email'] = $order-> billing_email;
-
+				
+				$current_user = wp_get_current_user();
+				$customerSubmitArray['merchantUserId'] = $current_user->ID;			
+				
+				
 				// Add Customer Array to Soap Data Array
 				$setTransactionSoapDataArray = array_merge($setTransactionSoapDataArray, array('Customer' => $customerSubmitArray ));
 				$customerSubmitArray = null; unset($customerSubmitArray);		
@@ -334,7 +383,10 @@ function init_your_gateway_class() {
 				$floatAmount = $woocommerceFormat * 100;
 				$basketArray['amountInCents'] = (int) $floatAmount;
 				$basketArray['description'] = "Order No:".(string)$order_id;               
-				$basketArray['currencyCode'] = get_woocommerce_currency();
+				//$basketArray['currencyCode'] = get_woocommerce_currency();
+				$basketArray['currencyCode'] = $safeKey = $this->settings['currency'];
+				
+				
 
 				$setTransactionSoapDataArray = array_merge($setTransactionSoapDataArray, array('Basket' => $basketArray ));
 				$basketArray = null; unset($basketArray);			
@@ -351,6 +403,22 @@ function init_your_gateway_class() {
 				// Add Additionnal Info Array to Soap Data Array
 				$setTransactionSoapDataArray = array_merge($setTransactionSoapDataArray, array('AdditionalInformation' => $additionalInformationArray ));
 				$additionalInformationArray = null; unset($additionalInformationArray);		
+								
+				// Transaction record array
+				if ( $this->debit_order_enabled == 'yes' && $this->debit_order_type != ''){			
+					if ($this->transaction_type != 'PAYMENT'){	
+						if ($this->transaction_type != 'RESERVE'){
+							$transactionRecordArray = array();
+							$transactionRecordArray ['statementDescription'] = $setTransactionSoapDataArray['Basket']['description'];
+							$transactionRecordArray ['managedBy'] = 'MERCHANT';
+							$transactionRecordArray ['anonymousUser'] = 'false' ;
+							
+							// Add Transaction Record Array to Soap Data Array
+							$setTransactionSoapDataArray = array_merge($setTransactionSoapDataArray, array('TransactionRecord' => $transactionRecordArray ));
+							$transactionRecordArray = null; unset($transactionRecordArray);	
+						}
+					}
+				}
 				
 				// Creating a constructor array for RPP instantiation
 				$constructorArray = array();
@@ -362,6 +430,8 @@ function init_your_gateway_class() {
 				//var_dump($constructorArray);
 				//var_dump($setTransactionSoapDataArray);
 				//die();
+				
+				
 
 				if(isset($prod)) {
 					$constructorArray['production'] = true;
@@ -466,23 +536,29 @@ function init_your_gateway_class() {
 					if($this->settings['testmode'] == "no") {		
 						$prod = 1;
 						$payu_adr = $this->produrl;
-						$soapUsername = $this->settings['username'];
-						$soapPassword = $this->settings['password'];
-						$safeKey = $this->settings['safekey'];
+						
+						//$soapUsername = $this->settings['username'];
+						//$soapPassword = $this->settings['password'];
+						//$safeKey = $this->settings['safekey'];
 					}
 					else {
 						require_once('library.payu/inc.demo/config.demo.php');	
 						$payu_adr = $this->stagingurl;		
-						require_once(WP_PLUGIN_DIR . "/" . plugin_basename( dirname(__FILE__)) . '/library.payu/inc.demo/config.demo.php');
+						
+						//require_once(WP_PLUGIN_DIR . "/" . plugin_basename( dirname(__FILE__)) . '/library.payu/inc.demo/config.demo.php');
 						//require_once('library.payu/inc.demo/config.demo.php');	
 						
-						$rpp['username'] = 'Staging Integration Store 1';
-						$rpp['password'] = '78cXrW1W';
-						$rpp['Safekey'] = '{45D5C765-16D2-45A4-8C41-8D6F84042F8C}';						
-						$soapUsername = $rpp['username'];
-						$soapPassword = $rpp['password'];
-						$safeKey = $rpp['Safekey'];			
+						//$rpp['username'] = 'Staging Integration Store 1';
+						//$rpp['password'] = '78cXrW1W';
+						//$rpp['Safekey'] = '{45D5C765-16D2-45A4-8C41-8D6F84042F8C}';						
+						//$soapUsername = $rpp['username'];
+						//$soapPassword = $rpp['password'];
+						//$safeKey = $rpp['Safekey'];			
 					}
+					
+					$soapUsername = $this->settings['username'];
+					$soapPassword = $this->settings['password'];
+					$safeKey = $this->settings['safekey'];
 								
 					$getTransactionSoapDataArray['Safekey'] =  $safeKey;
 					$getTransactionSoapDataArray['AdditionalInformation']['payUReference'] = $payUReference;        
@@ -505,6 +581,8 @@ function init_your_gateway_class() {
 					else {
 						$constructorArray['extendedDebugEnable'] = false;
 					}
+					
+					
 				    
 					if(isset($prod)) {
 						$constructorArray['production'] = true;
@@ -525,16 +603,48 @@ function init_your_gateway_class() {
 					//	$order_id 	= woocommerce_get_order_id_by_order_key( $order_key );
 					//	$order 		= new WC_Order( $order_id );
 					//}				
+					
+					
 				
 					//Checking the response from the SOAP call to see if successfull
 					if(isset($getTransactionResponse['soapResponse']['successful']) && ($getTransactionResponse['soapResponse']['successful']  === true)) {
 
-						if(isset($getTransactionResponse['soapResponse']['transactionType']) && (strtolower($getTransactionResponse['soapResponse']['transactionType']) == 'reserve') ) {
+						//if(isset($getTransactionResponse['soapResponse']['transactionType']) && (strtolower($getTransactionResponse['soapResponse']['transactionType']) == 'reserve') ) {
 							if(isset($getTransactionResponse['soapResponse']['transactionState']) && (strtolower($getTransactionResponse['soapResponse']['transactionState']) == 'successful') ) {                    
-								$transactionState = "reserve"; //funds reserved need to finalize in the admin box    
+								//$transactionState = "reserve"; //funds reserved need to finalize in the admin box    
 							
-								$transactionNotes = "PayU Reference: ".$getTransactionResponse['soapResponse']['payUReference'].", GatewayReference: ".$getTransactionResponse['soapResponse']['paymentMethodsUsed']['gatewayReference'];              
-	            				
+								$transactionNotes = "PayU Reference: ".$getTransactionResponse['soapResponse']['payUReference']."<br /> ";
+								if(isset($getTransactionResponse['soapResponse']['paymentMethodsUsed'])) {
+									if(is_array($getTransactionResponse['soapResponse']['paymentMethodsUsed'])) {										
+										$transactionNotes .= "<br /><br />Payment Method Details:";
+										foreach($getTransactionResponse['soapResponse']['paymentMethodsUsed'] as $key => $value) {
+											$transactionNotes .= "<br />&nbsp;&nbsp;- ".$key.":".$value." , ";
+										}
+									}
+								}
+								
+								if(isset($getTransactionResponse['soapResponse']['recurringDetails'])) {
+									if(is_array($getTransactionResponse['soapResponse']['recurringDetails'])) {
+										$transactionNotes .= "<br /><br />Recurring Details:";
+										foreach($getTransactionResponse['soapResponse']['recurringDetails'] as $key => $value) {
+											$transactionNotes .= "<br />&nbsp;&nbsp;- ".$key.":".$value." , ";
+										}
+									}
+								}								
+								
+								
+								//var_dump($transactionNotes);
+								//die();
+								/*
+								if ( $this->debit_order_enabled == 'yes' && $this->debit_order_type != ''){
+									if ($getTransactionResponse['soapResponse']['paymentType'] != 'PAYMENT'){	
+										if ($getTransactionResponse['soapResponse']['paymentType'] != 'RESERVE'){								
+											$transactionNotes = $transactionNotes. ", PmId: ".$getTransactionResponse['soapResponse']['pmId'];
+										}
+									}	
+								}	    
+								*/
+								
 								// Check order not already completed
 								if ( $order->status == 'completed' ) {
 										if ( 'yes' == $this->debug )
@@ -545,7 +655,7 @@ function init_your_gateway_class() {
 								// Validate amount	
 							
 								// Payment completed
-								$order->add_order_note( __( 'Payment completed:'. $transactionNotes, 'woocommerce' ) );
+								$order->add_order_note( __( 'Payment completed: <br />'. $transactionNotes, 'woocommerce' ) );
 								$order->payment_complete();		
 								$woocommerce -> cart -> empty_cart();	
 								if ( 'yes' == $this->debug )
@@ -553,7 +663,8 @@ function init_your_gateway_class() {
 								wp_redirect( $this->get_return_url( $order ) );
 								exit;												                
 							}            
-						}elseif(isset($getTransactionResponse['soapResponse']['transactionType']) && (strtolower($getTransactionResponse['soapResponse']['transactionType']) == 'payment') ) {                    
+						//}
+						/*if(isset($getTransactionResponse['soapResponse']['transactionType']) && (strtolower($getTransactionResponse['soapResponse']['transactionType']) == 'payment') ) {                    
 							if(isset($getTransactionResponse['soapResponse']['transactionState']) && (strtolower($getTransactionResponse['soapResponse']['transactionState']) == 'successful') ) {                    
 								$transactionState = "paymentSuccessfull"; //funds reserved need to finalize in the admin box
 
@@ -596,7 +707,7 @@ function init_your_gateway_class() {
   								wp_redirect( $this->get_return_url( $order ) );
   								exit;								
 							}*/							            
-						}
+						//}
 						else {
 							/*						
 							$order->add_order_note( __( 'Payment unsuccessful:'. $transactionNotes, 'woocommerce' ) );
