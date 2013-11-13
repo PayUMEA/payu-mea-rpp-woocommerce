@@ -18,9 +18,6 @@
 	 * 
 	 * @author     Warren Roman/Ramiz Mohamed
 	 * @copyright  2011-2013 PayU Payment Solutions (Pty) Ltd
-	 * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
-	 * @link       https://www.payu.co.za/for-developers/integration-information-and-downloads/
-	 * @category   PayU MEA
 	 */	
 
 //-----------------------------------

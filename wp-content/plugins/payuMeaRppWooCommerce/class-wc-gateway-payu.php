@@ -17,15 +17,10 @@
 	 * License for more details.
 	 * 
 	 * @author     Warren Roman/Ramiz Mohamed
-	 * @copyright  2011-2013 PayU Payment Solutions (Pty) Ltd
-	 * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
-	 * @link       https://www.payu.co.za/for-developers/integration-information-and-downloads/
-	 * @category   PayU MEA
+	 * @copyright  2011-2013 PayU Payment Solutions (Pty) Ltd	 	 	 
 	 */	
 	
 
-	DionWired      201799 
-	
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
@@ -33,7 +28,6 @@ Plugin Name: WooCommerce PayU RPP
 Plugin URI: http://www.payu.co.za
 Description: Payu RPP for woocommerce
 Version: 1.0
-Author: Ramiz Mohamed
 Author URI: http://www.payu.co.za
 */
 
@@ -60,7 +54,7 @@ function init_your_gateway_class() {
 		$this->has_fields = true;
 		$this->produrl = 'https://secure.payu.co.za';
 		$this->stagingurl = 'https://staging.payu.co.za';	
-		$this->method_title = __( 'PayU - Middle East And Africa (Business/Easymerchant - Redirect Payment Page)', 'woocommerce' );
+		$this->method_title = __( 'PayU MEA - Redirect', 'woocommerce' );
 		$this->notify_url = str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_PayU', home_url( '/' ) ) );
 	
 		// Load the settings.	
@@ -158,12 +152,6 @@ function init_your_gateway_class() {
 							'type' => 'checkbox',
 							'label' => __('Enable PayU MEA.', 'woocommerce'),
 							'default' => 'no'),
-					'testmode' => array(
-							'title' => __( 'PayU Environment', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Enable PayU sandbox', 'woocommerce' ),
-							'default' => 'yes',
-							'description' => __( 'PayU environment to use (ticked = staging/test,unticked = production).', 'woocommerce' ),
 					'title' => array(
 							'title' => __('Title:', 'woocommerce'),
 							'type'=> 'text',
@@ -197,12 +185,12 @@ function init_your_gateway_class() {
 							'description' =>  __('Given to Merchant by PayU', 'woocommerce')
 					),
 					'username' => array(
-							'title' => __('Username', 'PayU'),
+							'title' => __('SOAP Username', 'PayU'),
 							'type' => 'text',
 							'description' =>  __('Given to Merchant by PayU', 'woocommerce')
 					),
 					'password' => array(
-							'title' => __('Password', 'PayU'),
+							'title' => __('SOAP Password', 'PayU'),
 							'type' => 'text',
 							'description' =>  __('Given to Merchant by PayU', 'woocommerce')
 					),
@@ -236,6 +224,13 @@ function init_your_gateway_class() {
 									'options' => $dorder_tx_options,
 									'description' => __( 'Select the Debit Order Transaction Type.', 'woocommerce' )
 								),					
+								
+					'testmode' => array(
+							'title' => __( 'PayU sandbox', 'woocommerce' ),
+							'type' => 'checkbox',
+							'label' => __( 'Enable PayU sandbox', 'woocommerce' ),
+							'default' => 'yes',
+							'description' => __( 'PayU sandbox can be used to test payments.', 'woocommerce' )
 					),
 					/*'debug' => array(
 							'title' => __( 'Debug Log', 'woocommerce' ),
@@ -271,11 +266,10 @@ function init_your_gateway_class() {
 		if($this -> description) echo wpautop(wptexturize($this -> description));
 		?>			
 			<input type="radio" name="payu_transaction_type" id="payu_transaction_type" value="default" checked><?php print $this->settings['credit_card_subtitle'];?><br>
-			<?php	if ( is_user_logged_in() ) : ?>
 			<?php		if ( $this->debit_order_enabled == 'yes' && $this->debit_order_type != '') :?>
 			<input type="radio" name="payu_transaction_type" id="payu_transaction_type" value="recurring" ><?php print $this->settings['recurring_subtitle'];?><br>
 			<?php endif;
-			endif;
+			
 		}
 		
 		
@@ -367,8 +361,10 @@ function init_your_gateway_class() {
         
 				$customerSubmitArray['email'] = $order-> billing_email;
 				
-				$current_user = wp_get_current_user();
-				$customerSubmitArray['merchantUserId'] = $current_user->ID;			
+				if (!is_user_logged_in() ) {
+					$current_user = wp_get_current_user();
+					$customerSubmitArray['merchantUserId'] = $current_user->ID;					
+				}
 				
 				
 				// Add Customer Array to Soap Data Array
@@ -400,6 +396,10 @@ function init_your_gateway_class() {
 				$additionalInformationArray['returnUrl'] = $this->notify_url."&order_id=".$order_id;
 				$additionalInformationArray['merchantReference'] = (string)$order_id;
 
+				if (!is_user_logged_in() ) {										
+					$additionalInformationArray['callCenterRepId'] = "Unknown";
+				}
+				
 				// Add Additionnal Info Array to Soap Data Array
 				$setTransactionSoapDataArray = array_merge($setTransactionSoapDataArray, array('AdditionalInformation' => $additionalInformationArray ));
 				$additionalInformationArray = null; unset($additionalInformationArray);		
@@ -411,7 +411,12 @@ function init_your_gateway_class() {
 							$transactionRecordArray = array();
 							$transactionRecordArray ['statementDescription'] = $setTransactionSoapDataArray['Basket']['description'];
 							$transactionRecordArray ['managedBy'] = 'MERCHANT';
-							$transactionRecordArray ['anonymousUser'] = 'false' ;
+							if ( is_user_logged_in() ) {
+								$transactionRecordArray ['anonymousUser'] = 'false' ;
+							}
+							else {
+								$transactionRecordArray ['anonymousUser'] = 'true' ;
+							}
 							
 							// Add Transaction Record Array to Soap Data Array
 							$setTransactionSoapDataArray = array_merge($setTransactionSoapDataArray, array('TransactionRecord' => $transactionRecordArray ));
