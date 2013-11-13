@@ -24,10 +24,11 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
-Plugin Name: WooCommerce PayU RPP
-Plugin URI: http://www.payu.co.za
-Description: Payu RPP for woocommerce
+Plugin Name: WooCommerce - PayU MEA Payment Gateway (Redirect)
+Plugin URI: http://help.payu.co.za/display/developers/WooCommerce
+Description: Enables WooCommerce customers to do payments using PayU MEA (Middle East and Africa) as a payment gateway
 Version: 1.0
+Author: PayU MEA
 Author URI: http://www.payu.co.za
 */
 
@@ -54,7 +55,7 @@ function init_your_gateway_class() {
 		$this->has_fields = true;
 		$this->produrl = 'https://secure.payu.co.za';
 		$this->stagingurl = 'https://staging.payu.co.za';	
-		$this->method_title = __( 'PayU MEA - Redirect', 'woocommerce' );
+		$this->method_title = __( 'PayU MEA (Redirect)', 'woocommerce' );
 		$this->notify_url = str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_PayU', home_url( '/' ) ) );
 	
 		// Load the settings.	
@@ -117,7 +118,7 @@ function init_your_gateway_class() {
 	
 		public function admin_options(){
 		?>
-		<h3><?php _e( 'PayU - Middle East And Africa (Business/Easymerchant - Redirect Payment Page)', 'woocommerce' ); ?></h3>
+		<h3><?php _e( 'PayU MEA (Redirect)', 'woocommerce' ); ?></h3>
 		<p><?php _e( 'PayU Redirect Payment Page works by sending the user to PayU to enter their payment information.', 'woocommerce' ); ?></p>
 
 		<?php if ( $this->is_valid_for_use() ) : ?>
@@ -144,14 +145,23 @@ function init_your_gateway_class() {
 		function init_form_fields(){
 		
            // debit order transaction options
-           $dorder_tx_options = array('ONCE_OFF_PAYMENT_AND_DEBIT_ORDER' => __('ONCE_OFF_PAYMENT_AND_DEBIT_ORDER', 'woocommerce'), 'DEBIT_ORDER' => __('DEBIT_ORDER', 'woocommerce'), 'ONCE_OFF_RESERVE_AND_DEBIT_ORDER' => __('ONCE_OFF_RESERVE_AND_DEBIT_ORDER', 'woocommerce'));		
+           $dorder_tx_options = array(	'DEBIT_ORDER' => __('DEBIT_ORDER', 'woocommerce'), 
+										'ONCE_OFF_PAYMENT_AND_DEBIT_ORDER' => __('ONCE_OFF_PAYMENT_AND_DEBIT_ORDER', 'woocommerce'),
+										'ONCE_OFF_RESERVE_AND_DEBIT_ORDER' => __('ONCE_OFF_RESERVE_AND_DEBIT_ORDER', 'woocommerce'));		
 
 		   $this -> form_fields = array(
 					'enabled' => array(
-							'title' => __('Enable/Disable', 'woocommerce'),
+							'title' => __('Enable payment gateway option.', 'woocommerce'),
 							'type' => 'checkbox',
-							'label' => __('Enable PayU MEA.', 'woocommerce'),
+							'label' => __('', 'woocommerce'),
 							'default' => 'no'),
+					'testmode' => array(
+							'title' => __( 'Use staging/sandbox environment', 'woocommerce' ),
+							'type' => 'checkbox',
+							'label' => __( '(ticked = staging/sandbox, unticked = production)', 'woocommerce' ),
+							'default' => 'yes',
+							'description' => __( 'Which PayU environment to use for transactions.', 'woocommerce' )
+					),
 					'title' => array(
 							'title' => __('Title:', 'woocommerce'),
 							'type'=> 'text',
@@ -164,13 +174,6 @@ function init_your_gateway_class() {
 						'type'=> 'text',
 						'description' => __('This controls the credit title which the user sees during checkout.', 'woocommerce'),
 						'default' => __('Credit Card', 'woocommerce'),
-						'desc_tip'      => true,
-					),
-					'recurring_subtitle'   => array(
-						'title' => __('Recurring Payment Option Title:', 'woocommerce'),
-						'type'=> 'text',
-						'description' => __('This controls the recurring title which the user sees during checkout.', 'woocommerce'),
-						'default' => __('Credit Card Debit Order', 'woocommerce'),
 						'desc_tip'      => true,
 					),
 					'description' => array(
@@ -213,25 +216,26 @@ function init_your_gateway_class() {
 							'default' => __('PAYMENT', 'PayU')
 					),
 					'debit_order_enabled' => array(
-							'title' => __('Debit Order Payments', 'woocommerce'),
+							'title' => __('Enable Credit Card Debit Order Payments (recurring)', 'woocommerce'),
 							'type' => 'checkbox',
 							'label' => __('Enable Debit Order Payments.', 'woocommerce'),
 							'description' =>  __('If enabled, select the appropriate type below', 'woocommerce'),
 							'default' => 'no'),					
 					'debit_order_type'   => array(
-									'title' => __('Debit Order Type', 'woocommerce'),
+									'title' => __('Credit Card Debit Order Transaction Type', 'woocommerce'),
 									'type' => 'select',
 									'options' => $dorder_tx_options,
 									'description' => __( 'Select the Debit Order Transaction Type.', 'woocommerce' )
 								),					
-								
-					'testmode' => array(
-							'title' => __( 'PayU sandbox', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Enable PayU sandbox', 'woocommerce' ),
-							'default' => 'yes',
-							'description' => __( 'PayU sandbox can be used to test payments.', 'woocommerce' )
+					'recurring_subtitle'   => array(
+						'title' => __('Credit Card Debit Order Payment Option Title:', 'woocommerce'),
+						'type'=> 'text',
+						'description' => __('This controls the recurring title which the user sees during checkout.', 'woocommerce'),
+						'default' => __('Credit Card Debit Order', 'woocommerce'),
+						'desc_tip'      => true,
 					),
+					
+					
 					/*'debug' => array(
 							'title' => __( 'Debug Log', 'woocommerce' ),
 							'type' => 'checkbox',
