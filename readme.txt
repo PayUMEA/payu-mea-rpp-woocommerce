@@ -8,6 +8,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Enables WooCommerce customers to do payments using PayU MEA (Middle East and Africa) as a payment gateway
 
+For more details see: http://help.payu.co.za/display/developers/WooCommerce
 
 == Installation ==
 
