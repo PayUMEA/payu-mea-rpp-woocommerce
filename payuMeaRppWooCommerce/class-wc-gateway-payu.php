@@ -394,6 +394,7 @@ function init_your_gateway_class() {
 				// Additional Info array
 				$additionalInformationArray = array();
 				$additionalInformationArray['supportedPaymentMethods'] = $this->payment_method;
+				// $additionalInformationArray['redirectChannel'] = "responsive";
 				//$additionalInformationArray['cancelUrl'] = $order->get_cancel_order_url();
 				$additionalInformationArray['cancelUrl'] = $this->notify_url."&order_id=".$order_id;
 				//$additionalInformationArray['notificationUrl'] = get_option('payuRedirect_notificationURL' );
