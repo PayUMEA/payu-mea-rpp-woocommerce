@@ -145,7 +145,9 @@ function init_your_gateway_class() {
 		function init_form_fields(){
 
            // debit order transaction options
-           $dorder_tx_options = array(	'DEBIT_ORDER' => __('DEBIT_ORDER', 'woocommerce'),
+           $dorder_tx_options = array(
+						 				'PAYMENT' => __('NORMAL PAYMENT', 'woocommerce'),
+										'DEBIT_ORDER' => __('DEBIT_ORDER', 'woocommerce'),
 										'ONCE_OFF_PAYMENT_AND_DEBIT_ORDER' => __('ONCE_OFF_PAYMENT_AND_DEBIT_ORDER', 'woocommerce'),
 										'ONCE_OFF_RESERVE_AND_DEBIT_ORDER' => __('ONCE_OFF_RESERVE_AND_DEBIT_ORDER', 'woocommerce'));
 
