@@ -1,7 +1,7 @@
 <?php
 	/**
 	 * class-wc-gateway-payu.php
-	 *
+	 * 
 	 * Copyright (coffee) 2012-2013 PayU MEA (Pty) Ltd
 	 * 
 	 * LICENSE:
