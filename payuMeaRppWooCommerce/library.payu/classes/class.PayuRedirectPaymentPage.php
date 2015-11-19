@@ -1,11 +1,11 @@
-﻿<?php
+<?php
 	/**
 	 * class-wc-gateway-payu.php
 	 *
 	 * Copyright (coffee) 2012-2013 PayU MEA (Pty) Ltd
 	 * 
 	 * LICENSE:
-	 * 
+	 *  
 	 * This payment module is free software; you can redistribute it and/or modify
 	 * it under the terms of the GNU Lesser General Public License as published
 	 * by the Free Software Foundation; either version 3 of the License, or (at
