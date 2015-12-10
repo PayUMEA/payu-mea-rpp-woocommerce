@@ -20,5 +20,11 @@ For more details see: http://help.payu.co.za/display/developers/WooCommerce
 
 == Changelog ==
 
+= 1.2 =
+* Updated plugin to make use of wc_add_notice functionality.
+
+= 1.1 =
+* Updated code files encoding to charset UTF-8 without BOM.
+
 = 1.0 =
 * Initial plugin version.
