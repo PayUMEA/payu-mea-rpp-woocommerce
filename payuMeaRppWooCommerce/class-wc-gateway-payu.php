@@ -522,7 +522,18 @@ function init_your_gateway_class() {
 				$order = new WC_Order($_GET['order_id']);								
 				
 				$transactionNotes = "Payment Cancelled";
-				$woocommerce->add_error(__('', 'woothemes') . $transactionNotes);				
+				//$woocommerce->add_error(__('', 'woothemes') . $transactionNotes);
+				
+			        // Check for existence of new notification api (WooCommerce >= 2.1)
+			        if (function_exists('wc_add_notice'))
+			        {
+			            	wc_add_notice(__('', 'woothemes') . $transactionNotes, 'error');
+			        }
+			        else
+			        {
+					$woocommerce->add_error(__('', 'woothemes') . $transactionNotes);
+			        }
+				
 				$order->add_order_note( __( 'Payment cancelled:'. $transactionNotes, 'woocommerce' ) );								
 				if ( 'yes' == $this->debug ) {
 					$this->log->add( 'PayU', 'Payment cancelled.' );
@@ -730,7 +741,16 @@ function init_your_gateway_class() {
 							
 							$reason = $getTransactionResponse['soapResponse']['displayMessage'];
 							$transactionNotes = "PayU Reference: ".$getTransactionResponse['soapResponse']['payUReference'].", Error: ".addslashes($errorMessage).", Point Of Failure: ".$getTransactionResponse['soapResponse']['pointOfFailure'].", Result Code:".$getTransactionResponse['soapResponse']['resultCode'] ;            						
-							$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);				
+							//$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);	
+					        	// Check for existence of new notification api (WooCommerce >= 2.1)
+						        if (function_exists('wc_add_notice'))
+						        {
+						            	wc_add_notice(__('Payment Failed:', 'woothemes') . $reason, 'error');
+						        }
+						        else
+						        {
+								$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);
+						        }							
 							$order->add_order_note( __( 'Payment unsuccessful:'. $transactionNotes, 'woocommerce' ) );								
 							if ( 'yes' == $this->debug ) {
 								$this->log->add( 'PayU', 'Payment Failed.' );
