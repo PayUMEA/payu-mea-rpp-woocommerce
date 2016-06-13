@@ -1,7 +1,7 @@
 <?php
 	/**
 	 * class-wc-gateway-payu.php
-	 * 
+	 *
 	 * Copyright (coffee) 2012-2013 PayU MEA (Pty) Ltd
 	 * 
 	 * LICENSE:
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 Plugin Name: WooCommerce - PayU MEA Payment Gateway (Redirect)
 Plugin URI: http://help.payu.co.za/display/developers/WooCommerce
 Description: Enables WooCommerce customers to do payments using PayU MEA (Middle East and Africa) as a payment gateway
-Version: 1.2
+Version: 1.0
 Author: PayU MEA
 Author URI: http://www.payu.co.za
 */
@@ -394,7 +394,6 @@ function init_your_gateway_class() {
 				// Additional Info array
 				$additionalInformationArray = array();
 				$additionalInformationArray['supportedPaymentMethods'] = $this->payment_method;
-				// $additionalInformationArray['redirectChannel'] = "responsive";
 				//$additionalInformationArray['cancelUrl'] = $order->get_cancel_order_url();
 				$additionalInformationArray['cancelUrl'] = $this->notify_url."&order_id=".$order_id;
 				//$additionalInformationArray['notificationUrl'] = get_option('payuRedirect_notificationURL' );
@@ -522,18 +521,8 @@ function init_your_gateway_class() {
 				$order = new WC_Order($_GET['order_id']);								
 				
 				$transactionNotes = "Payment Cancelled";
-				//$woocommerce->add_error(__('', 'woothemes') . $transactionNotes);
-				
-			        // Check for existence of new notification api (WooCommerce >= 2.1)
-			        if (function_exists('wc_add_notice'))
-			        {
-			            	wc_add_notice(__('', 'woothemes') . $transactionNotes, 'error');
-			        }
-			        else
-			        {
-					$woocommerce->add_error(__('', 'woothemes') . $transactionNotes);
-			        }
-				
+				//$woocommerce->add_error(__('', 'woothemes') . $transactionNotes);	
+				wc_add_notice(__('', 'woothemes') . $transactionNotes, 'error');			
 				$order->add_order_note( __( 'Payment cancelled:'. $transactionNotes, 'woocommerce' ) );								
 				if ( 'yes' == $this->debug ) {
 					$this->log->add( 'PayU', 'Payment cancelled.' );
@@ -678,9 +667,11 @@ function init_your_gateway_class() {
 								// Payment completed
 								$order->add_order_note( __( 'Payment completed: <br />'. $transactionNotes, 'woocommerce' ) );
 								$order->payment_complete();		
-								$woocommerce -> cart -> empty_cart();	
+								$woocommerce->cart->empty_cart();	
 								if ( 'yes' == $this->debug )
-									$this->log->add( 'PayU', 'Payment complete.' );																
+									$this->log->add( 'PayU', 'Payment complete.' );										
+
+								wc_add_notice( __( 'Payment completed: <br />'. $transactionNotes, 'woocommerce' ), 'success');						
 								wp_redirect( $this->get_return_url( $order ) );
 								exit;												                
 							}            
@@ -742,15 +733,7 @@ function init_your_gateway_class() {
 							$reason = $getTransactionResponse['soapResponse']['displayMessage'];
 							$transactionNotes = "PayU Reference: ".$getTransactionResponse['soapResponse']['payUReference'].", Error: ".addslashes($errorMessage).", Point Of Failure: ".$getTransactionResponse['soapResponse']['pointOfFailure'].", Result Code:".$getTransactionResponse['soapResponse']['resultCode'] ;            						
 							//$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);	
-					        	// Check for existence of new notification api (WooCommerce >= 2.1)
-						        if (function_exists('wc_add_notice'))
-						        {
-						            	wc_add_notice(__('Payment Failed:', 'woothemes') . $reason, 'error');
-						        }
-						        else
-						        {
-								$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);
-						        }							
+							wc_add_notice(__('Payment Failed:', 'woothemes') . $reason, 'error');			
 							$order->add_order_note( __( 'Payment unsuccessful:'. $transactionNotes, 'woocommerce' ) );								
 							if ( 'yes' == $this->debug ) {
 								$this->log->add( 'PayU', 'Payment Failed.' );
@@ -773,18 +756,8 @@ function init_your_gateway_class() {
 						
 						$reason = $getTransactionResponse['soapResponse']['displayMessage'];
 						$transactionNotes = "PayU Reference: ".$getTransactionResponse['soapResponse']['payUReference'].", Error: ".addslashes($errorMessage).", Point Of Failure: ".$getTransactionResponse['soapResponse']['pointOfFailure'].", Result Code:".$getTransactionResponse['soapResponse']['resultCode'] ;            						
-						//$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);
-						
-					        // Check for existence of new notification api (WooCommerce >= 2.1)
-					        if (function_exists('wc_add_notice'))
-					        {
-					            	wc_add_notice(__('Payment Failed:', 'woothemes') . $reason, 'error');
-					        }
-					        else
-					        {
-							$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);
-					        }			
-						
+						//$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);	
+						wc_add_notice(__('Payment Failed:', 'woothemes') . $reason, 'error');			
 						$order->add_order_note( __( 'Payment unsuccessful:'. $transactionNotes, 'woocommerce' ) );								
 						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'PayU', 'Payment Failed.' );
