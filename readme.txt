@@ -1,8 +1,8 @@
 === WooCommerce - PayU MEA Payment Gateway (Redirect) ===
 Contributors:  integration@payu
 Requires at least: 3.0.1
-Tested up to: 3.4
-Stable tag: 4.3
+Tested up to: 4.5.2
+Stable tag: 4.5.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,6 +19,9 @@ For more details see: http://help.payu.co.za/display/developers/WooCommerce
 
 
 == Changelog ==
+
+= 1.3 =
+* Bug fixes
 
 = 1.2 =
 * Updated plugin to make use of wc_add_notice functionality.
