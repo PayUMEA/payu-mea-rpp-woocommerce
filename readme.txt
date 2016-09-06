@@ -2,7 +2,7 @@
 Contributors:  integration@payu
 Requires at least: 3.0.1
 Tested up to: 4.5.2
-Stable tag: 1.3
+Stable tag: 2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,6 +19,9 @@ For more details see: http://help.payu.co.za/display/developers/WooCommerce
 
 
 == Changelog ==
+
+= 2.0 =
+* Added IPN functionality
 
 = 1.3 =
 * Bug fixes

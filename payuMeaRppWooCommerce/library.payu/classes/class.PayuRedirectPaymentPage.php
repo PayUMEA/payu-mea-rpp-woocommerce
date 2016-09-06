@@ -109,8 +109,8 @@ class PayuRedirectPaymentPage extends PayuBase {
 	*
 	* @return array Returns the set transaction response details
 	*/
-	public function doSetTransactionSoapCall( $soapDataArray = array() ) {        
-		
+	public function doSetTransactionSoapCall($soapDataArray = array()) 
+	{        
 		$returnData = $this->doSoapCallToApi('setTransaction',$soapDataArray);        
 		
 		
