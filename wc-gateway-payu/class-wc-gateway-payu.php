@@ -60,7 +60,7 @@ function init_your_gateway_class() {
 			$this->method_title = __('PayU MEA (Redirect)', 'woocommerce');
 			$this->notify_url = str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_Gateway_PayU', home_url(
 				'/' )));
-			//$this->notify_url = 'http://3d4cdf72.ngrok.io?wc-api=WC_Gateway_PayU';
+			//$this->notify_url = 'https://fdcaab96.ngrok.io?wc-api=WC_Gateway_PayU';
 			// Load the settings.
 			$this-> init_form_fields();
 			$this-> init_settings();
@@ -325,19 +325,19 @@ function init_your_gateway_class() {
 				// Create Customer array
 				$customer = array();
 				if(isset($customerData['billFirstName'])) {
-					$customer['firstName'] = $order->billing_first_name;
+					$customer['firstName'] = $order-> billing_first_name;
 				} else {
-					$customer['firstName'] = $order->shipping_first_name;
+					$customer['firstName'] = $order-> shipping_first_name;
 				}
 
 				if(isset($customerData['billLastName'])) {
-					$customer['lastName'] = $order->billing_last_name;
+					$customer['lastName'] = $order-> billing_last_name;
 				} else {
-					$customer['lastName'] = $order->shipping_last_name;
+					$customer['lastName'] = $order-> shipping_last_name;
 				}
 
-				$customer['mobile'] = $order->billing_phone;
-				$customer['email'] = $order->billing_email;
+				$customer['mobile'] = $order-> billing_phone;
+				$customer['email'] = $order-> billing_email;
 
 				if (is_user_logged_in()) {
 					$current_user = wp_get_current_user();
@@ -529,7 +529,7 @@ function init_your_gateway_class() {
 
 					//Set merchant reference
 					if(!empty($getTransactionResponse['soapResponse']['merchantReference']) ) {
-						$order_id = (int) $getTransactionResponse['soapResponse']['merchantReference'];
+						$order_id = $getTransactionResponse['soapResponse']['merchantReference'];
 					}
 
 					$order = new WC_Order($order_id);
@@ -576,7 +576,7 @@ function init_your_gateway_class() {
 							if ('yes' == $this->debug)
 								$this->log->add('PayU', 'Payment complete.');
 
-							wc_add_notice(__('Payment completed successfully', 'woocommerce' ), 'success');
+							wc_add_notice(__('Payment completed: <br />', 'woocommerce' ) . $transactionNotes, 'success');
 							wp_redirect($this->get_return_url($order));
 							exit;
 						} else {
@@ -588,9 +588,10 @@ function init_your_gateway_class() {
 							$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);
 							$order->add_order_note( __("<strong>Payment unsuccessful: </strong><br />", 'woocommerce' ) . $transactionNotes);
 							if ( 'yes' == $this->debug ) {
-								$this->log->add('PayU', 'Payment Failed.');
+								$this->log->add( 'PayU', 'Payment Failed.' );
 							}
 							wp_redirect( $payment_page );
+							exit;
 						}
 					} else {
 						$reason = $getTransactionResponse['soapResponse']['displayMessage'];
@@ -612,6 +613,7 @@ function init_your_gateway_class() {
 							$this->log->add( 'PayU', 'Payment Failed.' );
 						}
 						wp_redirect( $payment_page );
+						exit;
 					}
 				}
 				catch(Exception $e) {
@@ -637,13 +639,10 @@ function init_your_gateway_class() {
 					$order = new WC_Order($order_id);
 				}
 
-				if(empty($order))
-					return;
-
 				// Check order not already completed
 				if($order->get_status() == 'completed') {
 					if('yes' == $this->debug)
-						$this->log->add('PayU', 'Order #' . $order->id . ' is already complete.');
+						$this->log->add('PayU', 'Aborting, Order #' . $order->id . ' is already complete.');
 					exit;
 				}
 
@@ -651,7 +650,6 @@ function init_your_gateway_class() {
 
 				//Setting a default failed trasaction state for this trasaction
 				$transactionState = "failure";
-				$transactionNotes = "<strong>-----PAYU IPN RECIEVED---</strong><br />";
 				try {
 					//Creating get transaction soap data array
 					$getTransactionData = array();
@@ -702,16 +700,15 @@ function init_your_gateway_class() {
 					) {
 
 						if(isset($returnData['TransactionState'])
-							&& (in_array($returnData['TransactionState'],  array('NEW', 'PROCESSING', 'P3DS', 'SUCCESSFUL', 'AWAITING_PAYMENT', 'PARTIAL_PAYMENT', 'OVER_PAYMENT', 'FAILED', 'TIMEOUT', 'EXPIRED')))
+							&& (strtolower($returnData['TransactionState']) == 'successful')
 						) {
 							//$transactionState = "reserve"; //funds reserved need to finalize in the admin box
 							$amountBasket = $returnData['Basket']['AmountInCents'] / 100;
-							$amountPaid = isset($returnData['PaymentMethodsUsed']['Creditcard']['AmountInCents']) ? $returnData['PaymentMethodsUsed']['Creditcard']['AmountInCents'] / 100 : 'N/A';
+							$amountPaid = isset($returnData['PaymentMethodsUsed']['Creditcard']['AmountInCents']) ? $returnData['PaymentMethodsUsed']['Creditcard']['AmountInCents'] / 100 : $returnData['PaymentMethodsUsed']['Eft']['AmountInCents'] / 100;
 
-							if(empty($amountPaid)) {
-								$amountPaid = isset($returnData['PaymentMethodsUsed']['Eft']['AmountInCents']) ? $returnData['PaymentMethodsUsed']['Eft']['AmountInCents'] / 100 : 'N/A';
-							}
 
+							$transactionNotes = "";
+							$transactionNotes .= "<strong>-----PAYU IPN RECIEVED---</strong><br />";
 							$transactionNotes .= "Order Amount: " . $amountBasket . "<br />";
 							$transactionNotes .= "Amount Paid: " . $amountPaid . "<br />";
 							$transactionNotes .= "Merchant Reference : " . $returnData['MerchantReference'] . "<br />";
@@ -719,7 +716,7 @@ function init_your_gateway_class() {
 							$transactionNotes .= "PayU Payment Status: ". $returnData["TransactionState"]."<br /><br />";
 
 							$paymentMethod = isset($returnData['PaymentMethodsUsed']['Creditcard']) ? $returnData['PaymentMethodsUsed']['Creditcard'] : $returnData['PaymentMethodsUsed']['Eft'];
-							if(!empty($paymentMethod)) {
+							if(isset($paymentMethod)) {
 								if(is_array($paymentMethod)) {
 									$transactionNotes .= "<strong>Payment Method Details:</strong><br />";
 									foreach($paymentMethod as $key => $value) {
@@ -727,53 +724,23 @@ function init_your_gateway_class() {
 									}
 								}
 							}
-							$order->add_order_note(__($transactionNotes, 'woocommerce' ));
-
 							// Validate amount
-							switch ($returnData['TransactionState']) {
-								// Payment completed
-								case 'SUCCESSFUL':
-									if(isset($getTransactionResponse['soapResponse']['transactionState'])
-										&& (strtolower($getTransactionResponse['soapResponse']['transactionState']) == 'successful')
-									) {
-										$order->payment_complete();
-										break;
-									}
-								case 'OVER_PAYMENT':
-									if(isset($getTransactionResponse['soapResponse']['transactionState'])
-										&& (strtolower($getTransactionResponse['soapResponse']['transactionState']) == 'successful')
-									) {
-										$order->payment_complete();
-										break;
-									}																
-								case 'FAILED':
-									$order->update_status('failed');
-									break;
-								case 'AWAITING_PAYMENT':
-									$order->update_status('on-hold');
-									break;
-								case 'PROCESSING':
-									$order->update_status('pending');
-									break;
-								default:
-									$order->update_status('pending');
-									break;
-							}
-							
+
+							// Payment completed
+							$comment_id = $order->add_order_note(__($transactionNotes, 'woocommerce' ));
+							$order->payment_complete();
 							if ('yes' == $this->debug)
-								$this->log->add('PayU', 'IPN Processing complete.');
+								$this->log->add('PayU', 'Payment complete.');
 							exit;
 						} else {
 							$reason = $getTransactionResponse['soapResponse']['displayMessage'];
 							$transactionNotes = "PayU Reference: " . $getTransactionResponse['soapResponse']['payUReference'] . "<br />";
 							$transactionNotes .= "Point Of Failure: " . $getTransactionResponse['soapResponse']['pointOfFailure'] . "<br />";
 							$transactionNotes .= "Result Code: " . $getTransactionResponse['soapResponse']['resultCode'];
-							$transactionNotes .= "Result Message: " . $getTransactionResponse['soapResponse']['resultMessage'];
 
-							$order->update_status('failed', __('<strong>Payment unsuccessful: </strong><br />', 'woocommerce') . $transactionNotes);
-							
+							$order->add_order_note(__('<strong>Payment unsuccessful: </strong><br />', 'woocommerce') . $transactionNotes);
 							if ('yes' == $this->debug) {
-								$this->log->add('PayU', 'Payment Failed. Payment status unknown');
+								$this->log->add('PayU', 'Payment Failed.');
 							}
 							exit;
 						}
@@ -783,10 +750,8 @@ function init_your_gateway_class() {
 						$transactionNotes = "PayU Reference: " . $getTransactionResponse['soapResponse']['payUReference'] . "<br />";
 						$transactionNotes .= "Point Of Failure: " . $getTransactionResponse['soapResponse']['pointOfFailure'] . "<br />";
 						$transactionNotes .= "Result Code: " . $getTransactionResponse['soapResponse']['resultCode'];
-						$transactionNotes .= "Result Message: " . $getTransactionResponse['soapResponse']['resultMessage'];
 
-						$order->update_status('failed', __('<strong>Payment unsuccessful: </strong><br />', 'woocommerce') . $transactionNotes);
-						
+						$order->add_order_note(__('<strong>Payment unsuccessful: </strong><br />', 'woocommerce') . $transactionNotes);
 						if ('yes' == $this->debug) {
 							$this->log->add('PayU', 'Payment Failed.');
 						}
