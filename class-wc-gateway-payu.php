@@ -573,10 +573,13 @@ function init_your_gateway_class() {
 							$order->add_order_note(__("<strong>Payment completed: </strong><br />", 'woocommerce' ) . $transactionNotes);
 							$order->payment_complete();
 							$woocommerce->cart->empty_cart();
-							if ('yes' == $this->debug)
+							if ('yes' == $this->debug) {
 								$this->log->add('PayU', 'Payment complete.');
 
-							wc_add_notice(__('Payment completed: <br />', 'woocommerce' ) . $transactionNotes, 'success');
+								// NM: 02 July 2019 - Line added to debug block
+								wc_add_notice(__('Payment completed: <br />', 'woocommerce' ) . $transactionNotes, 'success');
+							}
+							 
 							wp_redirect($this->get_return_url($order));
 							exit;
 						} else {
