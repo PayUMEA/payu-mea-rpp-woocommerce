@@ -1,10 +1,10 @@
 # WooCommerce - PayU MEA Payment Gateway (Redirect) fix for WooCommerce 2.4+
-Contributors:  PayU Technical & Integration Support 
-Requires at least: 3.0.1
-Tested up to: WordPress 5.2.4 | WooCommerce 3.7.0
-Stable tag: 4.3
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+* Contributors:  PayU Technical & Integration Support 
+* Requires at least: 3.0.1
+* Tested up to: WordPress 5.2.4 | WooCommerce 3.7.0
+* Stable tag: 4.3
+* License: GPLv2 or later
+* License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Enables WooCommerce customers to do payments using PayU MEA (Middle East and Africa) as a payment gateway.
 
