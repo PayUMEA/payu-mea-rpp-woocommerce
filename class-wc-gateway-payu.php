@@ -2,7 +2,7 @@
 /**
  * class-wc-gateway-payu.php
  *
- * Copyright (coffee) 2012-2013 PayU MEA (Pty) Ltd
+ * Copyright (coffee) 2012-2019 PayU MEA (Pty) Ltd
  *
  * LICENSE:
  *
@@ -17,7 +17,7 @@
  * License for more details.
  *
  * @author     Warren Roman/Ramiz Mohamed
- * @copyright  2011-2013 PayU Payment Solutions (Pty) Ltd
+ * @copyright  2011-2019 PayU Payment Solutions (Pty) Ltd
  */
 
 
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 Plugin Name: WooCommerce - PayU MEA Payment Gateway (Redirect)
 Plugin URI: http://help.payu.co.za/display/developers/WooCommerce
 Description: Enables WooCommerce customers to do payments using PayU MEA (Middle East and Africa) as a payment gateway
-Version: 1.0
+Version: 1.1
 Author: PayU MEA
 Author URI: http://www.payu.co.za
  */
@@ -588,7 +588,8 @@ function init_your_gateway_class() {
 							$transactionNotes .= "Point Of Failure: ".$getTransactionResponse['soapResponse']['pointOfFailure'] . "<br />";
 							$transactionNotes .= "Result Code:".$getTransactionResponse['soapResponse']['resultCode'];
 
-							$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);
+							wc_add_notice(__('Payment Failed:', 'woothemes') . $reason, 'error');
+							//$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);
 							$order->add_order_note( __("<strong>Payment unsuccessful: </strong><br />", 'woocommerce' ) . $transactionNotes);
 							if ( 'yes' == $this->debug ) {
 								$this->log->add( 'PayU', 'Payment Failed.' );
