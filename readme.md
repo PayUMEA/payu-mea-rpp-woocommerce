@@ -1,4 +1,4 @@
-# === WooCommerce - PayU MEA Payment Gateway (Redirect) fix for WooCommerce 2.4+ ===
+# WooCommerce - PayU MEA Payment Gateway (Redirect) fix for WooCommerce 2.4+
 Contributors:  PayU Technical & Integration Support 
 Requires at least: 3.0.1
 Tested up to: WordPress 5.2.4 | WooCommerce 3.7.0
@@ -8,10 +8,10 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Enables WooCommerce customers to do payments using PayU MEA (Middle East and Africa) as a payment gateway.
 
-# == Fix ==
+## Fix for WooCommerce 2.4+
 The original plugin has BOM characters within the PHP files, which are breaking the JSON response.  From WooCommerce 2.4+, WooCommerce requires a valid JSON response.  By re-encoding the PHP files as UTF8 without BOM characters, the redirect is successful. 
 
-# == Installation ==
+## Installation
 
 1. Upload `woocommerce-payu-mea-payment-gateway` directory to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
