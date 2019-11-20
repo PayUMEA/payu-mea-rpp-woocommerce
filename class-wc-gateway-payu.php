@@ -325,19 +325,19 @@ function init_your_gateway_class() {
 				// Create Customer array
 				$customer = array();
 				if(isset($customerData['billFirstName'])) {
-					$customer['firstName'] = $order-> billing_first_name;
+					$customer['firstName'] = $order-> get_billing_first_name();
 				} else {
-					$customer['firstName'] = $order-> shipping_first_name;
+					$customer['firstName'] = $order-> get_shipping_first_name();
 				}
 
 				if(isset($customerData['billLastName'])) {
-					$customer['lastName'] = $order-> billing_last_name;
+					$customer['lastName'] = $order-> get_billing_last_name();
 				} else {
-					$customer['lastName'] = $order-> shipping_last_name;
+					$customer['lastName'] = $order-> get_shipping_last_name();
 				}
 
-				$customer['mobile'] = $order-> billing_phone;
-				$customer['email'] = $order-> billing_email;
+				$customer['mobile'] = $order-> get_billing_phone();
+				$customer['email'] = $order-> get_billing_email();
 
 				if (is_user_logged_in()) {
 					$current_user = wp_get_current_user();
