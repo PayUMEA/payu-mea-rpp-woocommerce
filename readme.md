@@ -1,4 +1,4 @@
-# WooCommerce - PayU MEA Payment Gateway (Redirect) fix for WooCommerce 2.4+
+# WooCommerce - PayU MEA Payment Gateway (Redirect)
 * Contributors:  PayU Technical & Integration Support 
 * Requires at least: 3.0.1
 * Tested up to: WordPress 5.2.4 | WooCommerce 3.7.0
