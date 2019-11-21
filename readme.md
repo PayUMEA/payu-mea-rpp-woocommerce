@@ -1,6 +1,7 @@
 # WooCommerce - PayU MEA Payment Gateway (Redirect)
 * Contributors:  PayU Technical & Integration Support 
 * Requires at least: 3.0.1
+* version: 1.2
 * Tested up to: WordPress 5.2.4 | WooCommerce 3.7.0
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html

@@ -2,7 +2,7 @@
 /**
  * class-wc-gateway-payu.php
  *
- * Copyright (coffee) 2012-2019 PayU MEA (Pty) Ltd
+ * Copyright (coffee) 2012-2013 PayU MEA (Pty) Ltd
  *
  * LICENSE:
  *
@@ -16,8 +16,8 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
  * License for more details.
  *
- * @author     Warren Roman/Ramiz Mohamed
- * @copyright  2011-2019 PayU Payment Solutions (Pty) Ltd
+ * @author     Warren Roman/Ramiz Mohamed/Jakub Łukanowski
+ * @copyright  2011-2013 PayU Payment Solutions (Pty) Ltd
  */
 
 
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 Plugin Name: WooCommerce - PayU MEA Payment Gateway (Redirect)
 Plugin URI: http://help.payu.co.za/display/developers/WooCommerce
 Description: Enables WooCommerce customers to do payments using PayU MEA (Middle East and Africa) as a payment gateway
-Version: 1.1
+Version: 1.2
 Author: PayU MEA
 Author URI: http://www.payu.co.za
  */
@@ -172,6 +172,13 @@ function init_your_gateway_class() {
 					'default' => 'yes',
 					'description' => __( 'Which PayU environment to use for transactions.', 'woocommerce' )
 				),
+				'secure3d' => array(
+					'title' => __( 'Transaction with 3DS on Staging Environment', 'woocommerce' ),
+					'type' => 'checkbox',
+					'label' => __( '(ticked = yes, unticked = no)', 'woocommerce' ),
+					'default' => 'yes',
+					'description' => __( 'Should Staging transactions run through 3DS simulator (require setup on PayU side)', 'woocommerce' )
+					),
 				'title' => array(
 					'title' => __('Title:', 'woocommerce'),
 					'type'=> 'text',
@@ -204,6 +211,21 @@ function init_your_gateway_class() {
 				),
 				'password' => array(
 					'title' => __('SOAP Password', 'PayU'),
+					'type' => 'text',
+					'description' =>  __('Given to Merchant by PayU', 'woocommerce')
+				),
+				'staging_safekey' => array(
+					'title' => __('Staging SafeKey', 'woocommerce'),
+					'type' => 'text',
+					'description' =>  __('Given to Merchant by PayU', 'woocommerce')
+				),
+				'staging_username' => array(
+					'title' => __('Staging SOAP Username', 'PayU'),
+					'type' => 'text',
+					'description' =>  __('Given to Merchant by PayU', 'woocommerce')
+				),
+				'staging_password' => array(
+					'title' => __('Staging SOAP Password', 'PayU'),
 					'type' => 'text',
 					'description' =>  __('Given to Merchant by PayU', 'woocommerce')
 				),
@@ -303,14 +325,15 @@ function init_your_gateway_class() {
 				if($this->settings['testmode'] == "no") {
 					$prod = 1;
 					$payu_adr = $this->produrl;
-				}
-				else {
+					$apiUsername = $this->settings['username'];
+					$apiPassword = $this->settings['password'];
+					$safeKey = $this->settings['safekey'];
+				}else {
 					$payu_adr = $this->stagingurl;
+					$apiUsername = $this->settings['staging_username'];
+					$apiPassword = $this->settings['staging_password'];
+					$safeKey = $this->settings['staging_safekey'];
 				}
-
-				$apiUsername = $this->settings['username'];
-				$apiPassword = $this->settings['password'];
-				$safeKey = $this->settings['safekey'];
 
 				$txnData = array();
 				$txnData['Safekey'] = $safeKey;
@@ -367,8 +390,16 @@ function init_your_gateway_class() {
 				$additionalInfo['cancelUrl'] = $this->notify_url."&order_id=".$order_id.'&action=cancelled';
 				$additionalInfo['notificationUrl'] = $this->notify_url;
 				$additionalInfo['returnUrl'] = $this->notify_url."&order_id=".$order_id;
-				$additionalInfo['merchantReference'] = (string)$order_id;
-
+				$additionalInfo['merchantReference'] = get_bloginfo('name') . ' #' . $order->get_order_number();
+				if ($prod !== 1){
+				$additionalInfo['demoMode'] = "true";
+				}
+				if ($this->settings['secure3d'] == "yes"){
+				$additionalInfo['secure3d'] = "true";
+				}
+				if ($this->settings['secure3d'] == "no"){
+				$additionalInfo['secure3d'] = "false";
+				}
 				if (!is_user_logged_in()) {
 					$additionalInfo['callCenterRepId'] = "Unknown";
 				}
@@ -492,14 +523,18 @@ function init_your_gateway_class() {
 						$payu_adr = $this->produrl;
 					}
 					else {
-						require_once('library.payu/inc.demo/config.demo.php');
 						$payu_adr = $this->stagingurl;
 					}
 
+				if($this->settings['testmode'] == "no") {
 					$apiUsername = $this->settings['username'];
 					$apiPassword = $this->settings['password'];
 					$safeKey = $this->settings['safekey'];
-
+				}else {
+					$apiUsername = $this->settings['staging_username'];
+					$apiPassword = $this->settings['staging_password'];
+					$safeKey = $this->settings['staging_safekey'];
+					}
 					$getTransactionData['Safekey'] =  $safeKey;
 					$getTransactionData['AdditionalInformation']['payUReference'] = $payUReference;
 
@@ -588,8 +623,13 @@ function init_your_gateway_class() {
 							$transactionNotes .= "Point Of Failure: ".$getTransactionResponse['soapResponse']['pointOfFailure'] . "<br />";
 							$transactionNotes .= "Result Code:".$getTransactionResponse['soapResponse']['resultCode'];
 
+							// Check for existence of new notification api (WooCommerce >= 2.1)
+							if (function_exists('wc_add_notice'))
+							{
 							wc_add_notice(__('Payment Failed:', 'woothemes') . $reason, 'error');
-							//$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);
+							} else {
+							$woocommerce->add_error(__('Payment Failed:', 'woothemes') . $reason);
+							}
 							$order->add_order_note( __("<strong>Payment unsuccessful: </strong><br />", 'woocommerce' ) . $transactionNotes);
 							if ( 'yes' == $this->debug ) {
 								$this->log->add( 'PayU', 'Payment Failed.' );
@@ -662,13 +702,18 @@ function init_your_gateway_class() {
 						$prod = 1;
 						$payu_adr = $this->produrl;
 					} else {
-						require_once('library.payu/inc.demo/config.demo.php');
 						$payu_adr = $this->stagingurl;
 					}
 
+				if ($this->settings['testmode'] == "no"){
 					$apiUsername = $this->settings['username'];
 					$apiPassword = $this->settings['password'];
 					$safeKey = $this->settings['safekey'];
+				}else {
+					$apiUsername = $this->settings['staging_username'];
+					$apiPassword = $this->settings['staging_password'];
+					$safeKey = $this->settings['staging_safekey'];
+				}
 
 					$getTransactionData['Safekey'] =  $safeKey;
 					$getTransactionData['AdditionalInformation']['payUReference'] = $payUReference;
