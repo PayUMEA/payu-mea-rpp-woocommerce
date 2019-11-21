@@ -2,7 +2,7 @@
 /**
  * class-wc-gateway-payu.php
  *
- * Copyright (coffee) 2012-2013 PayU MEA (Pty) Ltd
+ * Copyright (coffee) 2012-2019 PayU MEA (Pty) Ltd
  *
  * LICENSE:
  *
@@ -17,7 +17,7 @@
  * License for more details.
  *
  * @author     Warren Roman/Ramiz Mohamed/Jakub Łukanowski
- * @copyright  2011-2013 PayU Payment Solutions (Pty) Ltd
+ * @copyright  2011-2019 PayU Payment Solutions (Pty) Ltd
  */
 
 
