@@ -111,7 +111,7 @@ function init_your_gateway_class() {
 					'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD',
 					'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS',
 					'MYR', 'NGN', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP',
-					'RMB','ZAR'))
+					'RMB','ZAR','KES','RWF','TZS','UGX'))
 			))
 				return false;
 
