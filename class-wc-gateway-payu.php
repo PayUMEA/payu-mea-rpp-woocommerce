@@ -368,6 +368,9 @@ function init_your_gateway_class() {
 				$additionalInfo['notificationUrl'] = $this->notify_url;
 				$additionalInfo['returnUrl'] = $this->notify_url."&order_id=".$order_id;
 				$additionalInfo['merchantReference'] = (string)$order_id;
+				if ($prod !== 1){
+				$additionalInfo['demoMode'] = "true";
+				}
 
 				if (!is_user_logged_in()) {
 					$additionalInfo['callCenterRepId'] = "Unknown";
