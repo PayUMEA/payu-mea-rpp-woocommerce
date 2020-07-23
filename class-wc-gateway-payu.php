@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 Plugin Name: WooCommerce - PayU MEA Payment Gateway (Redirect)
 Plugin URI: http://help.payu.co.za/display/developers/WooCommerce
 Description: Enables WooCommerce customers to do payments using PayU MEA (Middle East and Africa) as a payment gateway
-Version: 1.1
+Version: 1.2
 Author: PayU MEA
 Author URI: http://www.payu.co.za
  */
@@ -152,11 +152,17 @@ function init_your_gateway_class() {
 		 */
 		function init_form_fields(){
 
-			// debit order transaction options
+/*			// debit order transaction options
 			$dorder_tx_options = array(
 				'DEBIT_ORDER' => __('DEBIT_ORDER', 'woocommerce'),
 				'ONCE_OFF_PAYMENT_AND_DEBIT_ORDER' => __('ONCE_OFF_PAYMENT_AND_DEBIT_ORDER', 'woocommerce'),
 				'ONCE_OFF_RESERVE_AND_DEBIT_ORDER' => __('ONCE_OFF_RESERVE_AND_DEBIT_ORDER', 'woocommerce')
+			);
+*/
+			// "PAYMENT"/"RESERVE" transaction type chooser:
+			$order_tx_type = array (
+				'PAYMENT' => __('PAYMENT', 'woocommerce'),
+				'RESERVE' => __('RESERVE', 'woocommerce'),
 			);
 
 			$this -> form_fields = array(
@@ -207,6 +213,21 @@ function init_your_gateway_class() {
 					'type' => 'text',
 					'description' =>  __('Given to Merchant by PayU', 'woocommerce')
 				),
+				'dm_safekey' => array(
+					'title' => __('Discovery Miles Store SafeKey', 'woocommerce'),
+					'type' => 'text',
+					'description' =>  __('Given to Merchant by PayU', 'woocommerce')
+				),
+				'dm_username' => array(
+					'title' => __('Discovery Miles Store SOAP Username', 'PayU'),
+					'type' => 'text',
+					'description' =>  __('Given to Merchant by PayU', 'woocommerce')
+				),
+				'dm_password' => array(
+					'title' => __('Discovery Miles Store SOAP Password', 'PayU'),
+					'type' => 'text',
+					'description' =>  __('Given to Merchant by PayU', 'woocommerce')
+				),
 				'currency' => array(
 					'title' => __('Currency', 'PayU'),
 					'type' => 'text',
@@ -221,27 +242,28 @@ function init_your_gateway_class() {
 				),
 				'transaction_type' => array(
 					'title' => __('Transaction Type', 'woocommerce'),
-					'type' => 'text',
+					'type' => 'select',
 					'description' =>  __('Supported Transaction Types', 'woocommerce'),
-					'default' => __('PAYMENT', 'PayU')
+					'options' => $order_tx_type,
+					'description' => __( 'Select the Standard Transaction Type.', 'woocommerce' )
 				),
 				'debit_order_enabled' => array(
-					'title' => __('Enable Credit Card Debit Order Payments (recurring)', 'woocommerce'),
+					'title' => __('Discovery Miles', 'woocommerce'),
 					'type' => 'checkbox',
-					'label' => __('Enable Debit Order Payments.', 'woocommerce'),
-					'description' =>  __('If enabled, select the appropriate type below', 'woocommerce'),
+					'label' => __('Enable separate configuration for Discovery Miles.', 'woocommerce'),
+					//'description' =>  __('If enabled, select the appropriate type below', 'woocommerce'),
 					'default' => 'no'),
 				'debit_order_type'   => array(
-					'title' => __('Credit Card Debit Order Transaction Type', 'woocommerce'),
+					'title' => __('Discovery Miles Transaction Type', 'woocommerce'),
 					'type' => 'select',
-					'options' => $dorder_tx_options,
-					'description' => __( 'Select the Debit Order Transaction Type.', 'woocommerce' )
+					'options' => $order_tx_type,
+					'description' => __( 'Select the Discovery Miles Transaction Type.', 'woocommerce' )
 				),
 				'recurring_subtitle'   => array(
-					'title' => __('Credit Card Debit Order Payment Option Title:', 'woocommerce'),
+					'title' => __('Discovery Miles Payment Option Title:', 'woocommerce'),
 					'type'=> 'text',
-					'description' => __('This controls the recurring title which the user sees during checkout.', 'woocommerce'),
-					'default' => __('Credit Card Debit Order', 'woocommerce'),
+					'description' => __('This controls the Discovery Miles title which the user sees during checkout.', 'woocommerce'),
+					'default' => __('Pay with Discovery Miles', 'woocommerce'),
 					'desc_tip'      => true,
 				),
 
@@ -312,7 +334,34 @@ function init_your_gateway_class() {
 				$apiPassword = $this->settings['password'];
 				$safeKey = $this->settings['safekey'];
 
-				$txnData = array();
+
+                // 2020-07-09 - DM Separate Login Credentials
+                $payu_credentials_prefix = '';
+
+                // 2020-07-09 - DM Separate Login Credentials
+                /** If Discovery Miles Selected */
+                if(isset($_POST["payu_transaction_type"]) && ('recurring' == $_POST["payu_transaction_type"])) {
+                    if(!empty($this->settings['dm_username'])) {
+                        $apiUsername = $this->settings['dm_username'];
+                        $payu_credentials_prefix = 'dm';
+                    }
+                    if(!empty($this->settings['dm_password'])) {
+                        $apiPassword = $this->settings['dm_password'];
+                    }
+                    if(!empty($this->settings['dm_safekey'])) {
+                        $safeKey = $this->settings['dm_safekey'];
+                    }
+                }
+
+                // 2020-07-09 - DM Separate Login Credentials
+                $order->update_meta_data( 'payu_credentials_prefix', $payu_credentials_prefix );
+
+                // 2020-07-09 - DM Separate Login Credentials, if set then remove DM from allowed Methods
+                if(('dm' != $payu_credentials_prefix) && !empty($this->settings['dm_username'])) {
+                    $this->payment_method = trim(str_ireplace('DISCOVERYMILES', '', $this->payment_method), ",");
+                }
+
+                $txnData = array();
 				$txnData['Safekey'] = $safeKey;
 
 				if ($transactionTypeSelection == "default") {
@@ -371,7 +420,6 @@ function init_your_gateway_class() {
 				if ($prod !== 1){
 				$additionalInfo['demoMode'] = "true";
 				}
-
 				if (!is_user_logged_in()) {
 					$additionalInfo['callCenterRepId'] = "Unknown";
 				}
@@ -410,6 +458,8 @@ function init_your_gateway_class() {
 				$config['logEnable'] = $this->enable_logging;
 				$config['extendedDebugEnable'] = $this->extended_debug;
 
+
+
 				if(isset($prod)) {
 					$config['production'] = true;
 				}
@@ -435,6 +485,10 @@ function init_your_gateway_class() {
 					if(isset($setTransactionResponse['soapResponse']['payUReference'])) {
 						$payUReference = $setTransactionResponse['soapResponse']['payUReference'];
 						$setTransactionNotes = "PayU Reference: ".$payUReference;
+
+                        // 2020-07-09 - DM Separate Login Credentials, sjow allowed methods in order hist
+						$setTransactionNotes .= " Allowed Methods: ".$this->payment_method;
+
 						$order->add_order_note( __( 'Redirecting to PayU, '. $setTransactionNotes, 'woocommerce' ));
 						// Processing Payment
 						$order->update_status( 'pending', '', 'woocommerce');
@@ -499,12 +553,32 @@ function init_your_gateway_class() {
 						$payu_adr = $this->stagingurl;
 					}
 
+					// We need info from the order to determine the auth used
+					/** @var WC_Order $order */
+                    $order = new WC_Order($_GET['order_id']);
+
 					$apiUsername = $this->settings['username'];
 					$apiPassword = $this->settings['password'];
 					$safeKey = $this->settings['safekey'];
 
-					$getTransactionData['Safekey'] =  $safeKey;
-					$getTransactionData['AdditionalInformation']['payUReference'] = $payUReference;
+
+                    // 2020-07-09 - DM Separate Login Credentials
+                    $payu_credentials_prefix = $order->get_meta( 'payu_credentials_prefix', true );
+
+                    if(!empty($payu_credentials_prefix)) {
+                        if(!empty($this->settings[$payu_credentials_prefix.'_username'])) {
+                            $apiUsername = $this->settings[$payu_credentials_prefix.'_username'];
+                        }
+                        if(!empty($this->settings[$payu_credentials_prefix.'_password'])) {
+                            $apiPassword = $this->settings[$payu_credentials_prefix.'_password'];
+                        }
+                        if(!empty($this->settings[$payu_credentials_prefix.'_safekey'])) {
+                            $safeKey = $this->settings[$payu_credentials_prefix.'_safekey'];
+                        }
+                    }
+
+                    $getTransactionData['Safekey'] =  $safeKey;
+                    $getTransactionData['AdditionalInformation']['payUReference'] = $payUReference;
 
 					//Creating constructor array for the payURedirect and instantiating
 					$config = array();

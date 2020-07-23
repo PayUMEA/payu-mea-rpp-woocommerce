@@ -24,7 +24,7 @@
  * This file contains the class for doign PayuRedirectPaymentPage transactions
  * Date:
  * 
- * @version 1.0
+ * @version 1.2
  * 
  * 
  */
@@ -89,7 +89,8 @@ class PayuRedirectPaymentPage extends PayuBase {
 	* @return array Returns the get transaction response details
 	*/
 	public function doGetTransactionSoapCall( $soapDataArray = array() ) {
-		
+		//$this->safeKey = '' for check
+
 		$returnData = $this->doSoapCallToApi('getTransaction',$soapDataArray);    
 		
 		$returnArray = array();
@@ -110,7 +111,8 @@ class PayuRedirectPaymentPage extends PayuBase {
 	* @return array Returns the set transaction response details
 	*/
 	public function doSetTransactionSoapCall($soapDataArray = array()) 
-	{        
+	{
+
 		$returnData = $this->doSoapCallToApi('setTransaction',$soapDataArray);        
 		
 		

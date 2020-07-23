@@ -24,7 +24,7 @@
  * Within this file various common functionality is specified
  * Date:
  * 
- * @version 1.0
+ * @version 1.2
  * 
  * 
  */
