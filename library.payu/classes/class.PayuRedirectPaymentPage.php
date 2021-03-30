@@ -113,9 +113,8 @@ class PayuRedirectPaymentPage extends PayuBase {
 	public function doSetTransactionSoapCall($soapDataArray = array()) 
 	{
 
-		$returnData = $this->doSoapCallToApi('setTransaction',$soapDataArray);        
-		
-		
+		$returnData = $this->doSoapCallToApi('setTransaction',$soapDataArray);
+
 		//If succesfull then pass back the payUreference  with return URL
 		if( isset($returnData['return']['successful']) && ($returnData['return']['successful'] === true) ) {
 			$tempArray = array();

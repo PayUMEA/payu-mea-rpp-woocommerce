@@ -58,8 +58,13 @@ function init_your_gateway_class() {
 			$this->produrl = 'https://secure.payu.co.za';
 			$this->stagingurl = 'https://staging.payu.co.za';
 			$this->method_title = __('PayU MEA (Redirect)', 'woocommerce');
-			$this->notify_url = str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_Gateway_PayU', home_url(
-				'/' )));
+
+			// Why was this replace here, not sure
+			//$this->notify_url = str_replace('https:', 'http:', add_query_arg('wc-api', 'WC_Gateway_PayU', home_url(
+			//	'/' )));
+
+            $this->notify_url = add_query_arg('wc-api', 'WC_Gateway_PayU', home_url('/'));
+
 			//$this->notify_url = 'https://fdcaab96.ngrok.io?wc-api=WC_Gateway_PayU';
 			// Load the settings.
 			$this-> init_form_fields();
@@ -373,13 +378,13 @@ function init_your_gateway_class() {
 
 				// Create Customer array
 				$customer = array();
-				if(isset($customerData['billFirstName'])) {
+				if(empty($order-> get_shipping_first_name())) {
 					$customer['firstName'] = $order-> get_billing_first_name();
 				} else {
 					$customer['firstName'] = $order-> get_shipping_first_name();
 				}
 
-				if(isset($customerData['billLastName'])) {
+				if(empty($order-> get_shipping_last_name())) {
 					$customer['lastName'] = $order-> get_billing_last_name();
 				} else {
 					$customer['lastName'] = $order-> get_shipping_last_name();
@@ -388,6 +393,18 @@ function init_your_gateway_class() {
 				$customer['mobile'] = $order-> get_billing_phone();
 				$customer['email'] = $order-> get_billing_email();
 
+
+                if(empty($order-> get_shipping_country())) {
+                    $country_code = $order->get_billing_country();
+                } else {
+                    $country_code = $order->get_shipping_country();
+                }
+
+
+				$customer['countryCode'] = WC_Countries::get_country_calling_code( $country_code );
+                $customer['countryCode'] = str_replace("+", "", $customer['countryCode']);
+				$customer['regionalId'] = $customer['countryCode'];
+
 				if (is_user_logged_in()) {
 					$current_user = wp_get_current_user();
 					$customer['merchantUserId'] = $current_user->ID;
@@ -395,6 +412,7 @@ function init_your_gateway_class() {
 
 				// Add Customer to Soap Data Array
 				$txnData = array_merge($txnData, array('Customer' => $customer ));
+
 				$customer = null;
 				unset($customer);
 
@@ -495,6 +513,7 @@ function init_your_gateway_class() {
 					}
 				}
 			} catch(Exception $e) {
+
 				$exceptionErrorString = $e->getMessage();
 				if(!empty($exceptionErrorString)) {
 					$errorMessage = ' - '.$exceptionErrorString."<br /><br />";
