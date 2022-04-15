@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 Plugin Name: WooCommerce - PayU MEA Payment Gateway (Redirect)
 Plugin URI: http://help.payu.co.za/display/developers/WooCommerce
 Description: Enables WooCommerce customers to do payments using PayU MEA (Middle East and Africa) as a payment gateway
-Version: 1.3
+Version: 1.3.1
 Author: PayU MEA
 Author URI: http://www.payu.co.za
  */
@@ -401,7 +401,7 @@ function init_your_gateway_class() {
                 }
 
 
-				$customer['countryCode'] = WC_Countries::get_country_calling_code( $country_code );
+				$customer['countryCode'] = WC()->countries->get_country_calling_code( $country_code );
                 $customer['countryCode'] = str_replace("+", "", $customer['countryCode']);
 				$customer['regionalId'] = $customer['countryCode'];
 
