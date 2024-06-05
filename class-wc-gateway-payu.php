@@ -320,6 +320,7 @@ function init_your_gateway_class() {
 			//require('library.payu/classes/class.PayuRedirectPaymentPage.php');
 			require(WP_PLUGIN_DIR . "/" . plugin_basename( dirname(__FILE__)) . '/library.payu/classes/class.PayuRedirectPaymentPage.php');
 
+			$prod = 0;
 			$redirectapi = '/rpp.do?PayUReference=';
 			$transactionTypeSelection = $_POST['payu_transaction_type'];
 
@@ -478,7 +479,7 @@ function init_your_gateway_class() {
 
 
 
-				if(isset($prod)) {
+				if($prod) {
 					$config['production'] = true;
 				}
 
