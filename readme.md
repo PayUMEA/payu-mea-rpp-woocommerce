@@ -14,6 +14,14 @@ Enables WooCommerce customers to do payments using PayU MEA (Middle East and Afr
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Navigate to the WooCommerce Payment gateway settings and configure with PayU MEA API details
 
+## Adding payment methods in WooCommerce plugin
+
+1. Payment methods names must be provided in capital letters
+2. Payment methods names must be provided as comma separated list
+Example
+![image](https://github.com/user-attachments/assets/21ae601b-050c-4a41-b6bf-05222ae50533)
+Payment methods names can be found on https://payusahelp.atlassian.net/wiki/spaces/developers/pages/426054/setTransaction+RPP in field "SupportedPaymentMethods"
+
 ## Configuration for Discovery Miles
 
 If you have separate credentials for Discovery Miles, then:
