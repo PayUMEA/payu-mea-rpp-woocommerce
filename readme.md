@@ -20,6 +20,7 @@ Enables WooCommerce customers to do payments using PayU MEA (Middle East and Afr
 2. Payment methods names must be provided as comma separated list
 Example
 ![image](https://github.com/user-attachments/assets/21ae601b-050c-4a41-b6bf-05222ae50533)
+
 Payment methods names can be found on https://payusahelp.atlassian.net/wiki/spaces/developers/pages/426054/setTransaction+RPP in field "SupportedPaymentMethods"
 
 ## Configuration for Discovery Miles
