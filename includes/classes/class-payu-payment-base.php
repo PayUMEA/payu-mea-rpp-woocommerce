@@ -69,7 +69,7 @@ abstract class PayU_Payment_Base {
 
 			$string_to_log .= PHP_EOL;
 			
-			$this->logger->log($this->log_level, $string_to_log, ['source' => 'payu-rpp']);
+			$this->logger->log($this->log_level, $string_to_log, ['source' => 'payu']);
 		}
 	}
 }

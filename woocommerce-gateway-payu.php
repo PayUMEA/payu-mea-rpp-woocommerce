@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
 /*
- * Plugin Name: WooCommerce PayU Gateway Redirect
+ * Plugin Name: WooCommerce PayU Gateway
  * Plugin URI: https://wordpress.org/plugins/woocommerce-gateway-payu/
- * Description: Enables merchants accept payments using PayU Redirect Page
+ * Description: Accept payments using PayU
  * Author: PayU MEA
  * Author URI: https://southafrica.payu.com/
  * Version: 2.0.0
@@ -14,13 +14,13 @@
  * Requires Plugins: woocommerce
  * WC requires at least: 7.4
  * WC tested up to: 9.3
- * Text Domain: woocommerce-gateway-payu-rpp
+ * Text Domain: woocommerce-gateway-payu
  * Domain Path: /plugins
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-add_action( 'plugins_loaded', 'load_payu_rpp_gateway_class',0 );
+add_action( 'plugins_loaded', 'load_payu_rpp_gateway_class', 0 );
 
 function load_payu_rpp_gateway_class() {
 
@@ -90,7 +90,7 @@ function load_payu_rpp_gateway_class() {
         {
             $this->id = 'payu';
             $this->icon = WP_PLUGIN_URL . DIRECTORY_SEPARATOR . plugin_basename(dirname(__FILE__)) . '/images/payu_mea_logo.png';
-            $this->method_title = __('PayU MEA (Redirect)', 'woocommerce-gateway-payu-rpp');
+            $this->method_title = __('PayU MEA (Redirect)', 'woocommerce-gateway-payu');
             $this->method_description = __('Accept payments with credit/debit cards, EFT, Discovery miles, eBucks and many more');
             $this->has_fields = true;
         }
@@ -153,7 +153,7 @@ function load_payu_rpp_gateway_class() {
                     $this->log = wc_get_logger();
                 }
 
-                $this->log->log($level, $message, ['source' => 'payu-rpp']);
+                $this->log->log($level, $message, ['source' => 'payu']);
             }
         }
 
@@ -167,7 +167,7 @@ function load_payu_rpp_gateway_class() {
                     $this->log = wc_get_logger();
                 }
 
-                $this->log->clear('payu-rpp');
+                $this->log->clear('payu');
             }
     
             return $saved;
@@ -181,8 +181,8 @@ function load_payu_rpp_gateway_class() {
         public function admin_options()
         {
             ?>
-            <h3><?php _e('PayU MEA (Redirect)', 'woocommerce-gateway-payu-rpp'); ?></h3>
-            <p><?php _e('PayU Redirect Payment works by sending the user to PayU to enter their payment information.', 'woocommerce-gateway-payu-rpp'); ?></p>
+            <h3><?php _e('PayU MEA (Redirect)', 'woocommerce-gateway-payu'); ?></h3>
+            <p><?php _e('PayU Redirect Payment works by sending the user to PayU to enter their payment information.', 'woocommerce-gateway-payu'); ?></p>
 
             <?php if ($this->is_valid_for_use()) : ?>
                 <table class="form-table">
@@ -192,7 +192,7 @@ function load_payu_rpp_gateway_class() {
                     ?>
                 </table>
             <?php else : ?>
-                <div class="inline error"><p><strong><?php _e('Gateway Disabled', 'woocommerce-gateway-payu-rpp'); ?></strong>: <?php _e('PayU does not support your store currency.', 'woocommerce-gateway-payu-rpp'); ?></p></div>
+                <div class="inline error"><p><strong><?php _e('Gateway Disabled', 'woocommerce-gateway-payu'); ?></strong>: <?php _e('PayU does not support your store currency.', 'woocommerce-gateway-payu'); ?></p></div>
                 <?php
             endif;
         }
@@ -206,136 +206,136 @@ function load_payu_rpp_gateway_class() {
         function init_form_fields()
         {
             $order_tx_type = [
-                'PAYMENT' => __('PAYMENT', 'woocommerce-gateway-payu-rpp'),
-                'RESERVE' => __('RESERVE', 'woocommerce-gateway-payu-rpp'),
+                'PAYMENT' => __('PAYMENT', 'woocommerce-gateway-payu'),
+                'RESERVE' => __('RESERVE', 'woocommerce-gateway-payu'),
             ];
 
             $this->form_fields = [
                 'enabled' => [
-                    'title' => __('Enable payment gateway.', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Enable payment gateway.', 'woocommerce-gateway-payu'),
                     'type' => 'checkbox',
-                    'label' => __('', 'woocommerce-gateway-payu-rpp'),
+                    'label' => __('', 'woocommerce-gateway-payu'),
                     'default' => 'no',
                 ],
                 'testmode' => [
-                    'title' => __('Environment', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Environment', 'woocommerce-gateway-payu'),
                     'type' => 'checkbox',
-                    'label' => __('(ticked = staging/sandbox, unticked = production)', 'woocommerce-gateway-payu-rpp'),
+                    'label' => __('(ticked = staging/sandbox, unticked = production)', 'woocommerce-gateway-payu'),
                     'default' => 'yes',
-                    'description' => __('Which PayU environment to use for transactions.', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('Which PayU environment to use for transactions.', 'woocommerce-gateway-payu'),
                 ],
                 'title' => [
-                    'title' => __('Payment Title:', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Payment Title:', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' => __('This controls the title which the user sees during checkout.', 'woocommerce-gateway-payu-rpp'),
-                    'default' => __('PayU', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('This controls the title which the user sees during checkout.', 'woocommerce-gateway-payu'),
+                    'default' => __('PayU', 'woocommerce-gateway-payu'),
                     'desc_tip' => true,
                 ],
                 'credit_card_subtitle' => [
-                    'title' => __('Default Method Title:', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Default Method Title:', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' => __('This controls the title for default payment method which the user sees during checkout.', 'woocommerce-gateway-payu-rpp'),
-                    'default' => __('Credit/Debit Card, eBucks and EFT Pro', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('This controls the title for default payment method which the user sees during checkout.', 'woocommerce-gateway-payu'),
+                    'default' => __('Credit/Debit Card, eBucks and EFT Pro', 'woocommerce-gateway-payu'),
                     'desc_tip' => true,
                 ],
                 'description' => [
-                    'title' => __('Description:', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Description:', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' => __('The description of available payment methods which the user sees during checkout.', 'woocommerce-gateway-payu-rpp'),
-                    'default' => __('Payment method(s)', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('The description of available payment methods which the user sees during checkout.', 'woocommerce-gateway-payu'),
+                    'default' => __('Payment method(s)', 'woocommerce-gateway-payu'),
                 ],
                 'safekey' => [
-                    'title' => __('SafeKey', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('SafeKey', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu'),
                 ],
                 'username' => [
-                    'title' => __('SOAP Username', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('SOAP Username', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu'),
                 ],
                 'password' => [
-                    'title' => __('SOAP Password', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('SOAP Password', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu'),
                 ],
                 'dm_safekey' => [
-                    'title' => __('Discovery Miles SafeKey', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Discovery Miles SafeKey', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu'),
                 ],
                 'dm_username' => [
-                    'title' => __('Discovery Miles Username', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Discovery Miles Username', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu'),
                 ],
                 'dm_password' => [
-                    'title' => __('Discovery Miles Password', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Discovery Miles Password', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('Given to Merchant by PayU', 'woocommerce-gateway-payu'),
                 ],
                 'currency' => [
-                    'title' => __('Currency', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Currency', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' =>  __('Supported Currencies', 'woocommerce-gateway-payu-rpp'),
-                    'default' => __('ZAR', 'woocommerce-gateway-payu-rpp'),
+                    'description' =>  __('Supported Currencies', 'woocommerce-gateway-payu'),
+                    'default' => __('ZAR', 'woocommerce-gateway-payu'),
                 ],
                 'payment_method' => [
-                    'title' => __('Payment Method', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Payment Method', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' =>  __('Supported Payment Methods', 'woocommerce-gateway-payu-rpp'),
-                    'default' => __('CREDITCARD', 'woocommerce-gateway-payu-rpp'),
+                    'description' =>  __('Supported Payment Methods', 'woocommerce-gateway-payu'),
+                    'default' => __('CREDITCARD', 'woocommerce-gateway-payu'),
                 ],
                 'transaction_type' => [
-                    'title' => __('Transaction Type', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Transaction Type', 'woocommerce-gateway-payu'),
                     'type' => 'select',
-                    'description' =>  __('Supported Transaction Types', 'woocommerce-gateway-payu-rpp'),
+                    'description' =>  __('Supported Transaction Types', 'woocommerce-gateway-payu'),
                     'options' => $order_tx_type,
                 ],
                 'woocommerce_gateway_order' => [
-                    'title' => __('Sort Order', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Sort Order', 'woocommerce-gateway-payu'),
                     'type' => 'number',
-                    'description' =>  __('The order to display payment method in store front', 'woocommerce-gateway-payu-rpp'),
+                    'description' =>  __('The order to display payment method in store front', 'woocommerce-gateway-payu'),
                 ],
                 'debit_order_enabled' => [
-                    'title' => __('Discovery Miles', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Discovery Miles', 'woocommerce-gateway-payu'),
                     'type' => 'checkbox',
-                    'label' => __('Enable separate configuration for Discovery Miles.', 'woocommerce-gateway-payu-rpp'),
+                    'label' => __('Enable separate configuration for Discovery Miles.', 'woocommerce-gateway-payu'),
                     'default' => 'no',
                 ],
                 'debit_order_type' => [
-                    'title' => __('Discovery Miles Transaction Type', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Discovery Miles Transaction Type', 'woocommerce-gateway-payu'),
                     'type' => 'select',
                     'options' => $order_tx_type,
-                    'description' => __( 'Select the Discovery Miles Transaction Type.', 'woocommerce-gateway-payu-rpp' ),
+                    'description' => __( 'Select the Discovery Miles Transaction Type.', 'woocommerce-gateway-payu' ),
                 ],
                 'recurring_subtitle' => [
-                    'title' => __('Discovery Miles Payment Title:', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Discovery Miles Payment Title:', 'woocommerce-gateway-payu'),
                     'type' => 'text',
-                    'description' => __('This controls the Discovery Miles title which the user sees during checkout.', 'woocommerce-gateway-payu-rpp'),
-                    'default' => __('Pay with Discovery Miles', 'woocommerce-gateway-payu-rpp'),
+                    'description' => __('This controls the Discovery Miles title which the user sees during checkout.', 'woocommerce-gateway-payu'),
+                    'default' => __('Pay with Discovery Miles', 'woocommerce-gateway-payu'),
                     'desc_tip' => true,
                 ],
                 'debug' => [
-                    'title' => __('Debug Log', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Debug Log', 'woocommerce-gateway-payu'),
                     'type' => 'checkbox',
-                    'label' => __('Enable logging', 'woocommerce-gateway-payu-rpp'),
+                    'label' => __('Enable logging', 'woocommerce-gateway-payu'),
                     'default' => 'no',
-                    'description' => __('Default logging stored inside <code>woocommerce/logs/payu-rpp-%s.txt</code>', 'woocommerce-gateway-payu-rpp')
+                    'description' => __('Default logging stored inside <code>woocommerce/logs/payu-%s.txt</code>', 'woocommerce-gateway-payu')
                 ],
                 'enable_logging' => [
-                    'title' => __('PayU Logging', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('PayU Logging', 'woocommerce-gateway-payu'),
                     'type' => 'checkbox',
-                    'label' => __('Enable PayU logging', 'woocommerce-gateway-payu-rpp'),
+                    'label' => __('Enable PayU logging', 'woocommerce-gateway-payu'),
                     'default' => 'no',
-                    'description' => __('Log plugin events, such as IPN requests from PayU servers', 'woocommerce-gateway-payu-rpp')
+                    'description' => __('Log plugin events, such as IPN requests from PayU servers', 'woocommerce-gateway-payu')
                 ],
                 'extended_debug' => [
-                    'title' => __('Extended Debug Enable', 'woocommerce-gateway-payu-rpp'),
+                    'title' => __('Extended Debug Enable', 'woocommerce-gateway-payu'),
                     'type' => 'checkbox',
-                    'label' => __('Enable PayU extended logging', 'woocommerce-gateway-payu-rpp'),
+                    'label' => __('Enable PayU extended logging', 'woocommerce-gateway-payu'),
                     'default' => 'no',
-                    'description' => __('Log SOAP request, response and headers', 'woocommerce-gateway-payu-rpp')
+                    'description' => __('Log SOAP request, response and headers', 'woocommerce-gateway-payu')
                 ]
             ];
         }
@@ -417,7 +417,7 @@ function load_payu_rpp_gateway_class() {
                     $pay_u_reference = $response->payUReference;
                     $set_transaction_notes = 'PayU Reference: ' . $pay_u_reference;
                     $set_transaction_notes .= ' Allowed Methods: ' . $this->payment_method;
-                    $order->add_order_note(__('Redirecting to PayU, ' . $set_transaction_notes, 'woocommerce-gateway-payu-rpp'));
+                    $order->add_order_note(__('Redirecting to PayU, ' . $set_transaction_notes, 'woocommerce-gateway-payu'));
                     // Processing Payment
                     $order->update_status('pending', '', true);
                 }
@@ -494,7 +494,7 @@ function load_payu_rpp_gateway_class() {
                         $this->log->add('PayU', 'Aborting, Order #' . $order->get_id() . ' is already complete.');
                     }
 
-                    wc_add_notice(__('Order is already completed', 'woocommerce-gateway-payu-rpp' ), 'success');
+                    wc_add_notice(__('Order is already completed', 'woocommerce-gateway-payu' ), 'success');
                     wp_redirect($this->get_return_url($order));
                     exit;
                 }
@@ -513,13 +513,13 @@ function load_payu_rpp_gateway_class() {
                     }
 
                     // Payment completed
-                    $order->add_order_note(__("<strong>Payment completed: </strong><br />", 'woocommerce-gateway-payu-rpp' ) . $transaction_notes);
+                    $order->add_order_note(__("<strong>Payment completed: </strong><br />", 'woocommerce-gateway-payu' ) . $transaction_notes);
                     $order->payment_complete();
                     $woocommerce->cart->empty_cart();
 
                     if ('yes' === $this->debug) {
                         $this->log->add('PayU', 'Payment complete.');
-                        wc_add_notice(__('Payment completed: <br />', 'woocommerce-gateway-payu-rpp' ) . $transaction_notes, 'success');
+                        wc_add_notice(__('Payment completed: <br />', 'woocommerce-gateway-payu' ) . $transaction_notes, 'success');
                     }
                     
                     wp_redirect($this->get_return_url($order));
@@ -533,12 +533,12 @@ function load_payu_rpp_gateway_class() {
 
                     // Check for existence of new notification api (WooCommerce >= 2.1)
                     if (function_exists('wc_add_notice')) {
-                        wc_add_notice(__('Payment Failed:', 'woocommerce-gateway-payu-rpp') . $reason, 'error');
+                        wc_add_notice(__('Payment Failed:', 'woocommerce-gateway-payu') . $reason, 'error');
                     } else {
-                        $woocommerce->add_error(__('Payment Failed:', 'woocommerce-gateway-payu-rpp') . $reason);
+                        $woocommerce->add_error(__('Payment Failed:', 'woocommerce-gateway-payu') . $reason);
                     }
 
-                    $order->add_order_note(__( "<strong>Payment unsuccessful: </strong><br />". $transaction_notes, 'woocommerce-gateway-payu-rpp'));
+                    $order->add_order_note(__( "<strong>Payment unsuccessful: </strong><br />". $transaction_notes, 'woocommerce-gateway-payu'));
 
                     if ('yes' == $this->debug) {
                         $this->log->add( 'PayU', 'Payment Failed.' );
@@ -577,7 +577,7 @@ function load_payu_rpp_gateway_class() {
 
             if ($order->get_status() === 'processing' || $order->get_status() === 'completed') {
                 if ('yes' === $this->debug) {
-                    $this->log->add('payu-rpp', 'Aborting, Order #' . $order->get_id() . ' is already completed.');
+                    $this->log->add('payu', 'Aborting, Order #' . $order->get_id() . ' is already completed.');
                 }
                 
                 return;
@@ -616,11 +616,11 @@ function load_payu_rpp_gateway_class() {
                     // Validate amount
 
                     // Payment completed
-                    $order->add_order_note(__($transaction_notes, 'woocommerce-gateway-payu-rpp'));
+                    $order->add_order_note(__($transaction_notes, 'woocommerce-gateway-payu'));
                     $order->payment_complete();
 
                     if ('yes' === $this->debug) {
-                        $this->log->add('payu-rpp', 'Payment complete.');
+                        $this->log->add('payu', 'Payment complete.');
                     }
                 } else {
                     $transaction_notes = 'PayU Reference: ' . $this->get_tranx_id() . '<br />';
@@ -630,12 +630,12 @@ function load_payu_rpp_gateway_class() {
                     $order->add_order_note(__('<strong>Payment unsuccessful: </strong><br />', 'woocommerce') . $transaction_notes);
 
                     if ('yes' === $this->debug) {
-                        $this->log->add('payu-rpp', 'Payment Failed.');
+                        $this->log->add('payu', 'Payment Failed.');
                     }
                 }
             } catch(Exception $e) {
                 $errorMessage = $e->getMessage();
-                $this->log->add('payu-rpp', $errorMessage);
+                $this->log->add('payu', $errorMessage);
             }
         }
 
@@ -643,11 +643,11 @@ function load_payu_rpp_gateway_class() {
         {
             $order = new WC_Order($_GET['order_id']);
             $transactionNotes = "Payment cancelled by user";
-            wc_add_notice(__('', 'woocommerce-gateway-payu-rpp') . $transactionNotes, 'error');
-            $order->add_order_note( __($transactionNotes, 'woocommerce-gateway-payu-rpp' ));
+            wc_add_notice(__('', 'woocommerce-gateway-payu') . $transactionNotes, 'error');
+            $order->add_order_note( __($transactionNotes, 'woocommerce-gateway-payu' ));
 
             if ('yes' == $this->debug) {
-                $this->log->add( 'payu-rpp', 'Payment cancelled.' );
+                $this->log->add( 'payu', 'Payment cancelled.' );
             }
 
             wp_redirect($order->get_checkout_payment_url());
