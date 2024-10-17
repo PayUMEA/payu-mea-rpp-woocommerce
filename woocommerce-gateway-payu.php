@@ -913,12 +913,12 @@ function load_payu_rpp_gateway_class() {
 
             if (is_array($payment_methods)) {
                 foreach ($payment_methods as $method) {
-                    if (array_key_exists('gatewayReference', $method)) {
+                    if (property_exists($method, 'gatewayReference')) {
                         return true;
                     }
                 }
             } else {
-                if (array_key_exists('gatewayReference', $payment_methods)) {
+                if (property_exists($payment_methods, 'gatewayReference')) {
                     return true;
                 }
             }
@@ -936,13 +936,13 @@ function load_payu_rpp_gateway_class() {
 
             if (is_array($payment_methods)) {
                 foreach ($payment_methods as $method) {
-                    if (array_key_exists('gatewayReference', $method)) {
-                        $gateway_reference = $method['gatewayReference'];
+                    if (property_exists($method, 'gatewayReference')) {
+                        $gateway_reference = $method->gatewayReference;
                     }
                 }
             } else {
-                if (array_key_exists('gatewayReference', $payment_methods)) {
-                    $gateway_reference = $payment_methods['gatewayReference'];
+                if (property_exists($payment_methods, 'gatewayReference')) {
+                    $gateway_reference = $payment_methods->gatewayReference;
                 }
             }
 
