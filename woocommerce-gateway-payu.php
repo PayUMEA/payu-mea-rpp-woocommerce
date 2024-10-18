@@ -6,7 +6,7 @@
  * Description: Accept payments using PayU
  * Author: PayU MEA
  * Author URI: https://southafrica.payu.com/
- * Version: 2.0.0
+ * Version: 1.0.0
  * Requires at least: 6.5
  * Tested up to: 6.6
  * Requires PHP: 8.0
@@ -451,7 +451,7 @@ function load_payu_rpp_gateway_class() {
                 $this->process_ipn();
             }
 
-            $this->txn_data = [];
+            $this->txn_data = null;
         }
 
         private function process_capture()
